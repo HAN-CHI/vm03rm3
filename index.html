@@ -257,16 +257,23 @@
   }
 
   /* 致謝區塊樣式 */
-  .thanks-section {
-    max-width: 1400px;
-    margin: 24px auto 0;
-    background: linear-gradient(135deg, rgba(30, 41, 59, 0.96), rgba(15, 23, 42, 0.96));
-    border: 1px solid rgba(251, 191, 36, 0.45);
-    border-radius: 14px;
-    padding: 22px 26px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
-    text-align: center;
-  }
+.thanks-section {
+  max-width: 1400px;
+  margin: 24px auto 0;
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.96), rgba(15, 23, 42, 0.96));
+  border: 1px solid rgba(251, 191, 36, 0.45);
+  border-radius: 14px;
+  padding: 24px 26px;         /* 確保字多撐開時，上下依然保留安全的呼吸空間 */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+  text-align: center;
+
+  /* 應對字多字少的核心設定 */
+  min-height: 160px;          /* 字少時的最低保底高度（可依視覺需求調整數值） */
+  display: flex;
+  flex-direction: column;     /* 讓內部的標題與段落維持上下排列 */
+  justify-content: center;    /* 內容垂直置中 */
+  align-items: center;        /* 內容水平置中 */
+}
   .thanks-section.hidden {
     display: none;
   }
