@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>苗栗縣第23屆市民代表選舉 — 多選區即時開票與計票切換看板</title>
+  <style>
+    :root {
+      --bg-page: #f4f6f9;
+      --bg-card: #ffffff;
+      --bg-subtle: #f8fafc;
+      --navy: #1e3a5f;
+      --navy-dark: #13263f;
+      --slate-hdr: #2c5282;
+      --teal: #0f766e;
+      --teal-soft: #ccfbf1;
+      --amber: #b45309;
+      --amber-soft: #fef3c7;
+      --green: #166534;
+      --green-soft: #dcfce7;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --border: #cbd5e1;
+      --border-light: #e2e8f0;
+      --shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", system-ui, -apple-system, sans-serif;
+      background: var(--bg-page);
+      color: var(--text-main);
+      line-height: 1.5;
+    }
+
+    .topbar {
+      background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 60%, var(--slate-hdr) 100%);
+      color: #fff;
+      padding: 20px 24px;
+      box-shadow: 0 4px 14px rgba(19, 38, 63, 0.18);
+    }
+
+    .topbar-inner {
+      max-width: 1380px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .topbar h1 {
+      margin: 0 0 4px 0;
+      font-size: 1.45rem;
+      letter-spacing: 0.5px;
+    }
+
+    .topbar p {
+      margin: 0;
+      font-size: 0.92rem;
+      color: #e2e8f0;
+    }
+
+    .switcher-bar {
+      max-width: 1380px;
+      margin: -18px auto 20px auto;
+      padding: 0 20px;
+      position: relative;
+      z-index: 5;
+    }
+
+    .switcher-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px 18px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .switcher-left {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .switcher-label {
+      font-weight: 700;
+      color: var(--navy);
+      font-size: 0.95rem;
+      margin-right: 4px;
+    }
+
+    .pill-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .district-btn {
+      border: 1.5px solid var(--border);
+      background: var(--bg-subtle);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .district-btn:hover {
+      border-color: var(--slate-hdr);
+      background: #eff6ff;
+    }
+
+    .district-btn.active {
+      background: var(--navy);
+      border-color: var(--navy);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(30, 58, 95, 0.25);
+    }
+
+    .switcher-right {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    select.district-select {
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--text-main);
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .subnav-tabs {
+      display: flex;
+      gap: 6px;
+      background: var(--bg-subtle);
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid var(--border-light);
+    }
+
+    .tab-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      padding: 7px 13px;
+      border-radius: 7px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .tab-btn.active {
+      background: var(--teal);
+      color: #fff;
+    }
+
+    .container {
+      max-width: 1380px;
+      margin: 0 auto 40px auto;
+      padding: 0 20px;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    }
+
+    .kpi-label {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .kpi-value {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: var(--navy);
+      margin-top: 2px;
+    }
+
+    .kpi-sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px 20px;
+      margin-bottom: 18px;
+    }
+
+    .panel-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 1.12rem;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .panel-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .btn-secondary {
+      border: 1px solid var(--border);
+      background: var(--bg-subtle);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+      background: #e2e8f0;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      min-width: 720px;
+    }
+
+    th {
+      background: var(--navy);
+      color: #fff;
+      font-weight: 700;
+      padding: 10px 10px;
+      text-align: center;
+      border-bottom: 2px solid var(--navy-dark);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 9px 10px;
+      border-bottom: 1px solid var(--border-light);
+      vertical-align: middle;
+    }
+
+    tbody tr:nth-child(even) {
+      background: var(--bg-subtle);
+    }
+
+    tbody tr:hover {
+      background: #eff6ff;
+    }
+
+    .num-center { text-align: center; }
+    .num-right { text-align: right; font-variant-numeric: tabular-nums; }
+    .bold { font-weight: 700; }
+
+    .vote-input {
+      width: 82px;
+      padding: 5px 7px;
+      text-align: right;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      background: #fefce8;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .vote-input:focus {
+      outline: 2px solid var(--slate-hdr);
+      background: #fff;
+    }
+
+    .status-select {
+      padding: 4px 6px;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+      font-size: 0.82rem;
+      background: #fff;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .badge-gray { background: #e2e8f0; color: #334155; }
+    .badge-amber { background: var(--amber-soft); color: var(--amber); }
+    .badge-green { background: var(--green-soft); color: var(--green); }
+    .badge-teal { background: var(--teal-soft); color: var(--teal); }
+
+    .bar-track {
+      width: 100%;
+      height: 10px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+      min-width: 90px;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--slate-hdr), var(--teal));
+      border-radius: 999px;
+      transition: width 0.25s ease;
+    }
+
+    .total-row td {
+      background: #dbeafe !important;
+      font-weight: 800;
+      color: var(--navy);
+      border-top: 2px solid var(--navy);
+      border-bottom: 3px double var(--navy);
+    }
+
+    .thanks-banner {
+      margin-top: 16px;
+      padding: 16px 20px;
+      border-radius: 10px;
+      background: #f0fdfa;
+      border: 1px solid #99f6e4;
+      color: #134e4a;
+    }
+
+    .thanks-banner h4 {
+      margin: 0 0 6px 0;
+      font-size: 1.05rem;
+    }
+
+    .thanks-banner p {
+      margin: 0 0 6px 0;
+      white-space: pre-line;
+    }
+
+    .thanks-sign {
+      text-align: right;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--teal);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+    }
+
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .search-input {
+      padding: 6px 11px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.88rem;
+      min-width: 210px;
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div>
+        <h1>苗栗縣第23屆鄉鎮市民代表選舉 — 多選區即時開票切換看板</h1>
+        <p id="header-subtitle">苗栗縣第23屆鄉鎮市民代表選舉｜可自由切換選區與檢視模式（即時看板／逐所計票／投開票所名冊／致謝設定）</p>
+      </div>
+      <div id="header-badge" class="badge badge-teal" style="font-size:0.88rem; padding:6px 12px;">
+        已載入 4 個選區
+      </div>
+    </div>
+  </header>
+
+  <section class="switcher-bar">
+    <div class="switcher-card">
+      <div class="switcher-left">
+        <span class="switcher-label">快速切換選區：</span>
+        <div class="pill-group" id="district-buttons"></div>
+      </div>
+
+      <div class="switcher-right">
+        <select id="district-select" class="district-select" aria-label="選擇選舉區">
+          <option value="yuanli-1">苑裡鎮 第1選區（12人）</option>
+          <option value="yuanli-2">苑裡鎮 第2選區（3人）</option>
+          <option value="tongxiao-1">通霄鎮 第1選區（8人）</option>
+          <option value="tongxiao-4">通霄鎮 第4選區（4人）</option>
+        </select>
+
+        <div class="subnav-tabs" role="tablist">
+          <button class="tab-btn active" data-tab="board" type="button">即時看板</button>
+          <button class="tab-btn" data-tab="tally" type="button">逐所計票</button>
+          <button class="tab-btn" data-tab="stations" type="button">投開票所名冊</button>
+          <button class="tab-btn" data-tab="thanks" type="button">致謝設定</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main class="container">
+    <div class="kpi-grid" id="kpi-grid"></div>
+
+    <!-- Tab 1: 即時看板 -->
+    <section id="view-board" class="panel">
+      <div class="panel-header">
+        <h2 class="panel-title" id="board-title">即時開票看板</h2>
+        <div class="panel-actions">
+          <button class="btn-secondary" type="button" id="btn-sim-votes">填入示範票數</button>
+          <button class="btn-secondary" type="button" id="btn-reset-votes">歸零重算</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:70px;">號次</th>
+              <th style="width:140px;">候選人姓名</th>
+              <th style="width:100px;">推薦政黨</th>
+              <th style="width:120px;">目前總得票</th>
+              <th style="width:100px;">得票率</th>
+              <th style="width:150px;">得票比例視覺條</th>
+              <th style="width:120px;">即時狀態</th>
+              <th style="width:80px;">排名</th>
+              <th style="width:120px;">當選狀態</th>
+            </tr>
+          </thead>
+          <tbody id="board-tbody"></tbody>
+        </table>
+      </div>
+      <div id="thanks-preview" class="thanks-banner hidden"></div>
+    </section>
+
+    <!-- Tab 2: 逐所計票 -->
+    <section id="view-tally" class="panel hidden">
+      <div class="panel-header">
+        <h2 class="panel-title" id="tally-title">投開票所逐所計票登錄</h2>
+        <div class="panel-actions">
+          <input type="text" id="tally-search" class="search-input" placeholder="搜尋投票所編號、名稱或村里..." />
+          <button class="btn-secondary" type="button" id="btn-export-csv">匯出本選區計票 CSV</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead id="tally-thead"></thead>
+          <tbody id="tally-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Tab 3: 投開票所名冊 -->
+    <section id="view-stations" class="panel hidden">
+      <div class="panel-header">
+        <h2 class="panel-title" id="stations-title">投開票所名冊與鄰別</h2>
+        <div class="panel-actions">
+          <input type="text" id="station-search" class="search-input" placeholder="篩選村里、鄰別或投票所..." />
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:90px;">行政區</th>
+              <th style="width:100px;">投票所編號</th>
+              <th style="width:230px;">投票所名稱</th>
+              <th style="width:280px;">詳細地址</th>
+              <th style="width:100px;">所屬村里</th>
+              <th style="width:190px;">所屬鄰別</th>
+              <th style="width:120px;">含原住民選舉人</th>
+            </tr>
+          </thead>
+          <tbody id="stations-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Tab 4: 致謝設定 -->
+    <section id="view-thanks" class="panel hidden">
+      <div class="panel-header">
+        <h2 class="panel-title" id="thanks-title">本選區開票看板致謝設定</h2>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="cfg-thanks-show">顯示開關（控制即時看板是否顯示致謝區塊）</label>
+          <select id="cfg-thanks-show">
+            <option value="隱藏">隱藏</option>
+            <option value="顯示">顯示</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="cfg-thanks-heading">致謝標題</label>
+          <input type="text" id="cfg-thanks-heading" />
+        </div>
+        <div class="form-group">
+          <label for="cfg-thanks-sign">落款署銜</label>
+          <input type="text" id="cfg-thanks-sign" />
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:12px;">
+        <label for="cfg-thanks-body">致謝內容</label>
+        <textarea id="cfg-thanks-body" rows="3"></textarea>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const RAW_DATA = {"districts": [{"id": "yuanli-1", "label": "苑裡鎮 第1選區", "town": "苑裡鎮", "title": "苑裡鎮第1選舉區 市民代表選舉", "subtitle": "苗栗縣第23屆鄉鎮市民代表選舉｜12 位候選人即時開票與逐所計票看板", "quotaNote": "共 12 位候選人", "thanksTitle": "感謝苑裡鎮第1選舉區鄉親支持", "thanksBody": "感謝苑裡鎮第1選舉區所有鄉親與計票工作人員辛勞付出，讓開票資訊即時透明呈現！", "thanksSign": "苑裡鎮第1選舉區開票統計小組 敬啟", "candidates": [{"no": 1, "name": "洪晃琦", "party": "無"}, {"no": 2, "name": "張素英", "party": "無"}, {"no": 3, "name": "吳若安", "party": "無"}, {"no": 4, "name": "呂景文", "party": "無"}, {"no": 5, "name": "蕭長生", "party": "無"}, {"no": 6, "name": "陳郁元", "party": "無"}, {"no": 7, "name": "鄒秋蘭", "party": "無"}, {"no": 8, "name": "鄭羽聰", "party": "無"}, {"no": 9, "name": "徐鈺婷", "party": "無"}, {"no": 10, "name": "張琦享", "party": "無"}, {"no": 11, "name": "孟文源", "party": "無"}, {"no": 12, "name": "鄭義能", "party": "無"}]}, {"id": "yuanli-2", "label": "苑裡鎮 第2選區", "town": "苑裡鎮", "title": "苑裡鎮第2選舉區 市民代表選舉", "subtitle": "苗栗縣第23屆鄉鎮市民代表選舉｜3 位候選人即時開票與逐所計票看板", "quotaNote": "共 3 位候選人", "thanksTitle": "感謝苑裡鎮第2選舉區鄉親支持", "thanksBody": "感謝苑裡鎮第2選舉區所有鄉親與計票工作人員辛勞付出，讓開票資訊即時透明呈現！", "thanksSign": "苑裡鎮第2選舉區開票統計小組 敬啟", "candidates": [{"no": 1, "name": "張文財", "party": "無"}, {"no": 2, "name": "江世坤", "party": "無"}, {"no": 3, "name": "賴欣儀", "party": "無"}]}, {"id": "tongxiao-1", "label": "通霄鎮 第1選區", "town": "通霄鎮", "title": "通霄鎮第1選舉區 市民代表選舉", "subtitle": "苗栗縣第23屆鄉鎮市民代表選舉｜8 位候選人即時開票與逐所計票看板", "quotaNote": "共 8 位候選人", "thanksTitle": "感謝通霄鎮第1選舉區鄉親支持", "thanksBody": "感謝通霄鎮第1選舉區所有鄉親與計票工作人員辛勞付出，讓開票資訊即時透明呈現！", "thanksSign": "通霄鎮第1選舉區開票統計小組 敬啟", "candidates": [{"no": 1, "name": "繆宗翰", "party": "無"}, {"no": 2, "name": "周志勳", "party": "無"}, {"no": 3, "name": "吳昭興", "party": "無"}, {"no": 4, "name": "林芸嬅", "party": "無"}, {"no": 5, "name": "江珊綾", "party": "無"}, {"no": 6, "name": "羅可喬", "party": "無"}, {"no": 7, "name": "鄭國雄", "party": "無"}, {"no": 8, "name": "陳繼宗", "party": "無"}]}, {"id": "tongxiao-4", "label": "通霄鎮 第4選區", "town": "通霄鎮", "title": "通霄鎮第4選舉區 市民代表選舉", "subtitle": "苗栗縣第23屆鄉鎮市民代表選舉｜4 位候選人即時開票與逐所計票看板", "quotaNote": "共 4 位候選人", "thanksTitle": "感謝通霄鎮第4選舉區鄉親支持", "thanksBody": "感謝通霄鎮第4選舉區所有鄉親與計票工作人員辛勞付出，讓開票資訊即時透明呈現！", "thanksSign": "通霄鎮第4選舉區開票統計小組 敬啟", "candidates": [{"no": 1, "name": "呂金穎", "party": "無"}, {"no": 2, "name": "黃三榮", "party": "無"}, {"no": 3, "name": "陳建成", "party": "無"}, {"no": 4, "name": "黃啟森", "party": "無"}]}], "stationsByTown": {"通霄鎮": [{"code": 161, "name": "通霄鎮立圖書館", "address": "苗栗縣通霄鎮通東里1鄰中正路9-5號", "village": "通東里", "neighbors": "全里", "indigenous": "平地、山地"}, {"code": 162, "name": "通霄鎮老人文康中心", "address": "苗栗縣通霄鎮通西里13鄰中正路73-1號", "village": "通西里", "neighbors": "1-5, 11-13, 18-21, 24-28, 31", "indigenous": "平地"}, {"code": 163, "name": "通西里舊衛生所", "address": "苗栗縣通霄鎮通西里13鄰中正路2巷9號", "village": "通西里", "neighbors": "6-10, 14-17, 22-23, 29-30, 32-34", "indigenous": "山地"}, {"code": 164, "name": "通霄鎮立幼兒園", "address": "苗栗縣通霄鎮平元里4鄰南和路一段36巷11號", "village": "平元里", "neighbors": "1-8", "indigenous": "平地"}, {"code": 165, "name": "平元社區活動中心", "address": "苗栗縣通霄鎮平元里9鄰平新二路19號", "village": "平元里", "neighbors": "9-14", "indigenous": "平地"}, {"code": 166, "name": "通霄國民小學(A106教室)", "address": "苗栗縣通霄鎮通東里23鄰中正路12號", "village": "平安里", "neighbors": "1-7, 12, 14", "indigenous": "山地"}, {"code": 167, "name": "平安社區活動中心", "address": "苗栗縣通霄鎮平安里9鄰環市路二段715號", "village": "平安里", "neighbors": "8-11, 13, 15-18", "indigenous": "平地"}, {"code": 168, "name": "圳頭社區(里)活動中心", "address": "苗栗縣通霄鎮圳頭里6鄰圳頭55之6號", "village": "圳頭里", "neighbors": "全里", "indigenous": "無"}, {"code": 169, "name": "舊梅南社區活動中心", "address": "苗栗縣通霄鎮梅南里5鄰南和路二段347巷13-1號", "village": "梅南里", "neighbors": "1-5, 13-14", "indigenous": "無"}, {"code": 170, "name": "梅南社區(里)活動中心", "address": "苗栗縣通霄鎮梅南里6鄰南和路二段460號(高速公路橋下)", "village": "梅南里", "neighbors": "6-12", "indigenous": "平地、山地"}, {"code": 171, "name": "通南媽祖文化館", "address": "苗栗縣通霄鎮通南里11鄰南華路16巷63-1號", "village": "通南里", "neighbors": "6-13", "indigenous": "平地"}, {"code": 172, "name": "通南長壽俱樂部", "address": "苗栗縣通霄鎮通南里11鄰南華路16巷63-3號", "village": "通南里", "neighbors": "1-3, 14, 20-21", "indigenous": "山地"}, {"code": 173, "name": "新通南社區活動中心", "address": "苗栗縣通霄鎮通南里18鄰129-2號", "village": "通南里", "neighbors": "4-5, 15-19", "indigenous": "無"}, {"code": 174, "name": "烏眉國民中學禮堂", "address": "苗栗縣通霄鎮內湖里1鄰5-1號", "village": "內湖里", "neighbors": "1-10", "indigenous": "平地"}, {"code": 175, "name": "內湖社區活動中心", "address": "苗栗縣通霄鎮內湖里14鄰136-2號", "village": "內湖里", "neighbors": "11-17", "indigenous": "平地、山地"}, {"code": 176, "name": "楓樹社區活動中心", "address": "苗栗縣通霄鎮楓樹里6鄰71-1號", "village": "楓樹里", "neighbors": "全里", "indigenous": "無"}, {"code": 177, "name": "烏眉社區活動中心", "address": "苗栗縣通霄鎮烏眉里8鄰95號", "village": "烏眉里", "neighbors": "全里", "indigenous": "平地"}, {"code": 178, "name": "福龍社區活動中心", "address": "苗栗縣通霄鎮福龍里7鄰67-1號", "village": "福龍里", "neighbors": "全里", "indigenous": "無"}, {"code": 179, "name": "福源社區活動中心", "address": "苗栗縣通霄鎮福源里8鄰71-5號", "village": "福源里", "neighbors": "全里", "indigenous": "平地"}, {"code": 180, "name": "城北社區活動中心", "address": "苗栗縣通霄鎮城北里7鄰60-1號", "village": "城北里", "neighbors": "全里", "indigenous": "平地、山地"}, {"code": 181, "name": "城南社區活動中心", "address": "苗栗縣通霄鎮城南里10鄰123-1號", "village": "城南里", "neighbors": "全里", "indigenous": "平地"}, {"code": 182, "name": "南和社區活動中心", "address": "苗栗縣通霄鎮南和里8鄰95-1號", "village": "南和里", "neighbors": "全里", "indigenous": "無"}, {"code": 183, "name": "福興武術國民中小學", "address": "苗栗縣通霄鎮福興里6鄰58-2號", "village": "福興里", "neighbors": "全里", "indigenous": "無"}, {"code": 184, "name": "坪頂社區活動中心", "address": "苗栗縣通霄鎮坪頂里7鄰70-1號", "village": "坪頂里", "neighbors": "全里", "indigenous": "無"}, {"code": 185, "name": "五南社區守望相助隊", "address": "苗栗縣通霄鎮五南里6鄰中山路663號旁土地公廟", "village": "五南里", "neighbors": "1-6", "indigenous": "山地"}, {"code": 186, "name": "五南社區活動中心", "address": "苗栗縣通霄鎮五南里10鄰中山路150號", "village": "五南里", "neighbors": "7-14", "indigenous": "平地、山地"}, {"code": 187, "name": "五北社區活動中心", "address": "苗栗縣通霄鎮五北里2鄰18號", "village": "五北里", "neighbors": "1-7", "indigenous": "山地"}, {"code": 188, "name": "隘口寮公有戲坪地", "address": "苗栗縣通霄鎮五北里12鄰102-5號", "village": "五北里", "neighbors": "8-16", "indigenous": "平地"}, {"code": 189, "name": "慈后宮(前段)", "address": "苗栗縣通霄鎮通灣里10鄰93之2號", "village": "通灣里", "neighbors": "1-11", "indigenous": "山地"}, {"code": 190, "name": "慈后宮(後段)", "address": "苗栗縣通霄鎮通灣里10鄰93之2號", "village": "通灣里", "neighbors": "12-19", "indigenous": "平地"}, {"code": 191, "name": "雲天宮", "address": "苗栗縣通霄鎮新埔里4鄰25號", "village": "新埔里", "neighbors": "全里", "indigenous": "平地"}, {"code": 192, "name": "內島社區活動中心", "address": "苗栗縣通霄鎮內島里6鄰53-1號", "village": "內島里", "neighbors": "全里", "indigenous": "無"}, {"code": 193, "name": "拱天宮餐廳", "address": "苗栗縣通霄鎮白東里2鄰8之16號", "village": "白東里", "neighbors": "1-13", "indigenous": "無"}, {"code": 194, "name": "白東白西社區聯合活動中心", "address": "苗栗縣通霄鎮白西里15鄰106-9號", "village": "白東里", "neighbors": "14-21", "indigenous": "平地、山地"}, {"code": 195, "name": "五雲宮", "address": "苗栗縣通霄鎮白西里4鄰白西25號之1", "village": "白西里", "neighbors": "全里", "indigenous": "平地"}], "苑裡鎮": [{"code": 196, "name": "臺灣基督長老教會苑裡教會", "address": "苗栗縣苑裡鎮苑東里建國路58號", "village": "苑東里", "neighbors": "1-12, 19, 20", "indigenous": "山地"}, {"code": 197, "name": "老人文康中心", "address": "苗栗縣苑裡鎮苑東里13鄰興隆路2-1號", "village": "苑東里", "neighbors": "13-18", "indigenous": "無"}, {"code": 198, "name": "客庄國小(一年甲班)", "address": "苗栗縣苑裡鎮客庄里新興路21號", "village": "苑南里", "neighbors": "1, 3-5", "indigenous": "無"}, {"code": 199, "name": "苑東苑南苑北社區聯合活動中心二樓", "address": "苗栗縣苑裡鎮苑北里13鄰中山路312號", "village": "苑南里", "neighbors": "2, 6-13", "indigenous": "無"}, {"code": 200, "name": "苑裡國小活動中心", "address": "苗栗縣苑裡鎮苑北里中山路307號", "village": "苑北里", "neighbors": "全里", "indigenous": "平地"}, {"code": 201, "name": "西平社區活動中心(新)", "address": "苗栗縣苑裡鎮西平里13鄰出水路20-1號", "village": "西平里", "neighbors": "1-12, 17", "indigenous": "無"}, {"code": 202, "name": "濱海藝文中心", "address": "苗栗縣苑裡鎮西平里14鄰64-11號", "village": "西平里", "neighbors": "13-16, 18", "indigenous": "山地"}, {"code": 203, "name": "苑港社區活動中心", "address": "苗栗縣苑裡鎮苑港里3鄰31號", "village": "苑港里", "neighbors": "全里", "indigenous": "山地、平地"}, {"code": 204, "name": "西勢里活動中心", "address": "苗栗縣苑裡鎮西勢里5鄰39-7號旁", "village": "西勢里", "neighbors": "2-4, 11, 12", "indigenous": "山地、平地"}, {"code": 205, "name": "寶三宮", "address": "苗栗縣苑裡鎮西勢里9鄰2號旁", "village": "西勢里", "neighbors": "1, 5-10", "indigenous": "無"}, {"code": 206, "name": "海岸里活動中心", "address": "苗栗縣苑裡鎮海岸里8鄰64號", "village": "海岸里", "neighbors": "全里", "indigenous": "平地"}, {"code": 207, "name": "文苑國小(課輔一教室)", "address": "苗栗縣苑裡鎮房裡里2鄰14號", "village": "房裡里", "neighbors": "1-10", "indigenous": "平地"}, {"code": 208, "name": "房裡社區活動中心", "address": "苗栗縣苑裡鎮房裡里1鄰26號", "village": "房裡里", "neighbors": "11-22", "indigenous": "山地"}, {"code": 209, "name": "客庄社區活動中心", "address": "苗栗縣苑裡鎮客庄里15鄰116-2號", "village": "客庄里", "neighbors": "1-4, 6-7, 15, 19-21", "indigenous": "無"}, {"code": 210, "name": "客庄國小(一年丁班)", "address": "苗栗縣苑裡鎮客庄里新興路21號", "village": "客庄里", "neighbors": "8-10, 14, 22, 23, 29-31", "indigenous": "平地"}, {"code": 211, "name": "客庄國小(三年甲班)", "address": "苗栗縣苑裡鎮客庄里新興路21號", "village": "客庄里", "neighbors": "5, 11-13, 16-18, 24-28", "indigenous": "山地"}, {"code": 212, "name": "中正社區活動中心", "address": "苗栗縣苑裡鎮中正里14鄰111-1號", "village": "中正里", "neighbors": "1-12", "indigenous": "平地"}, {"code": 213, "name": "中正國小(補校教室)", "address": "苗栗縣苑裡鎮中正里14鄰111號", "village": "中正里", "neighbors": "13-16", "indigenous": "山地"}, {"code": 214, "name": "苑坑社區活動中心", "address": "苗栗縣苑裡鎮苑坑里8鄰83-1號", "village": "苑坑里", "neighbors": "全里", "indigenous": "山地、平地"}, {"code": 215, "name": "水坡社區活動中心", "address": "苗栗縣苑裡鎮水坡里4鄰36-3號", "village": "水坡里", "neighbors": "全里", "indigenous": "山地、平地"}, {"code": 216, "name": "新復社區活動中心", "address": "苗栗縣苑裡鎮新復里6鄰69號旁", "village": "新復里", "neighbors": "全里", "indigenous": "無"}, {"code": 217, "name": "山脚國小(一年甲班)", "address": "苗栗縣苑裡鎮舊社里10鄰47號", "village": "山脚里", "neighbors": "1-8", "indigenous": "無"}, {"code": 218, "name": "山脚里活動中心(慈護宮)", "address": "苗栗縣苑裡鎮山脚里14鄰378號", "village": "山脚里", "neighbors": "9-21", "indigenous": "山地"}, {"code": 219, "name": "農業部農田水利署臺中管理處山腳工作站", "address": "苗栗縣苑裡鎮舊社里3鄰36-7號", "village": "舊社里", "neighbors": "1-4", "indigenous": "山地"}, {"code": 220, "name": "鎮立托兒所", "address": "苗栗縣苑裡鎮舊社里10鄰110-1號", "village": "舊社里", "neighbors": "5-16", "indigenous": "平地"}, {"code": 221, "name": "福田社區活動中心", "address": "苗栗縣苑裡鎮福田里11鄰133-1號", "village": "福田里", "neighbors": "全里", "indigenous": "無"}, {"code": 222, "name": "石鎮社區活動中心", "address": "苗栗縣苑裡鎮石鎮里6鄰40號", "village": "石鎮里", "neighbors": "全里", "indigenous": "無"}, {"code": 223, "name": "蕉埔里民眾活動中心", "address": "苗栗縣苑裡鎮蕉埔里6鄰68號", "village": "蕉埔里", "neighbors": "全里", "indigenous": "無"}, {"code": 224, "name": "南勢里活動中心", "address": "苗栗縣苑裡鎮南勢里9鄰116之1號", "village": "南勢里", "neighbors": "全里", "indigenous": "山地"}, {"code": 225, "name": "泰田里民眾活動中心", "address": "苗栗縣苑裡鎮泰田里3鄰62號", "village": "泰田里", "neighbors": "1-5", "indigenous": "山地、平地"}, {"code": 226, "name": "藍田國小(學生活動中心)", "address": "苗栗縣苑裡鎮泰田里3鄰62號", "village": "泰田里", "neighbors": "6-10", "indigenous": "山地、平地"}, {"code": 227, "name": "上舘里民眾活動中心", "address": "苗栗縣苑裡鎮上舘里4鄰62-7號", "village": "上舘里", "neighbors": "1, 3, 4, 7, 8", "indigenous": "無"}, {"code": 228, "name": "上舘社區守望相助巡守隊", "address": "苗栗縣苑裡鎮上舘里5鄰101號旁", "village": "上舘里", "neighbors": "2, 5, 6, 9, 10", "indigenous": "無"}, {"code": 229, "name": "玉田里活動中心", "address": "苗栗縣苑裡鎮玉田里4鄰45號", "village": "玉田里", "neighbors": "1-4, 9-11", "indigenous": "山地、平地"}, {"code": 230, "name": "玉田社區活動中心", "address": "苗栗縣苑裡鎮玉田里社苓派出所東北側200公尺處(高鐵橋下)", "village": "玉田里", "neighbors": "5-8", "indigenous": "平地"}, {"code": 231, "name": "社苓社區活動中心", "address": "苗栗縣苑裡鎮社苓里4鄰50號", "village": "社苓里", "neighbors": "1-8, 10", "indigenous": "山地"}, {"code": 232, "name": "社苓里中山堂", "address": "苗栗縣苑裡鎮社苓里4鄰50號東側", "village": "社苓里", "neighbors": "9, 11-15", "indigenous": "山地、平地"}, {"code": 233, "name": "山柑社區活動中心", "address": "苗栗縣苑裡鎮山柑里5鄰58-1號", "village": "山柑里", "neighbors": "全里", "indigenous": "平地"}, {"code": 234, "name": "頂田心福德祠活動中心", "address": "苗栗縣苑裡鎮田心里2鄰15-10號", "village": "田心里", "neighbors": "1-5", "indigenous": "平地"}, {"code": 235, "name": "田心里民眾活動中心", "address": "苗栗縣苑裡鎮田心里6鄰62-1號", "village": "田心里", "neighbors": "6-10", "indigenous": "無"}]}};
+
+    // State per district: votes[stationIdx][candIdx] = number, status[stationIdx] = string, elect[candIdx] = string, thanks = {...}
+    const state = {};
+    let currentDistrictId = RAW_DATA.districts[0].id;
+    let currentTab = "board";
+
+    function initState() {
+      RAW_DATA.districts.forEach((d) => {
+        const stations = RAW_DATA.stationsByTown[d.town] || [];
+        state[d.id] = {
+          votes: stations.map(() => d.candidates.map(() => 0)),
+          statuses: stations.map(() => "待開票"),
+          electStates: d.candidates.map(() => "未開票"),
+          thanks: {
+            show: "隱藏",
+            heading: d.thanksTitle,
+            body: d.thanksBody,
+            sign: d.thanksSign,
+          },
+        };
+      });
+    }
+
+    function getCurrentDistrict() {
+      return RAW_DATA.districts.find((d) => d.id === currentDistrictId) || RAW_DATA.districts[0];
+    }
+
+    function getDistrictTotals(d) {
+      const st = state[d.id];
+      const stations = RAW_DATA.stationsByTown[d.town] || [];
+      const candTotals = d.candidates.map((_, cIdx) => {
+        let sum = 0;
+        for (let sIdx = 0; sIdx < stations.length; sIdx++) {
+          sum += Number(st.votes[sIdx]?.[cIdx] || 0);
+        }
+        return sum;
+      });
+      const grandTotal = candTotals.reduce((a, b) => a + b, 0);
+      const reportedCount = st.statuses.filter((s) => s === "已回報").length;
+      return { candTotals, grandTotal, reportedCount, totalStations: stations.length };
+    }
+
+    function renderSwitcher() {
+      const btnContainer = document.getElementById("district-buttons");
+      btnContainer.innerHTML = "";
+      RAW_DATA.districts.forEach((d) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "district-btn" + (d.id === currentDistrictId ? " active" : "");
+        btn.textContent = d.label;
+        btn.addEventListener("click", () => switchDistrict(d.id));
+        btnContainer.appendChild(btn);
+      });
+
+      document.getElementById("district-select").value = currentDistrictId;
+
+      document.querySelectorAll(".tab-btn").forEach((b) => {
+        b.classList.toggle("active", b.dataset.tab === currentTab);
+      });
+
+      document.getElementById("view-board").classList.toggle("hidden", currentTab !== "board");
+      document.getElementById("view-tally").classList.toggle("hidden", currentTab !== "tally");
+      document.getElementById("view-stations").classList.toggle("hidden", currentTab !== "stations");
+      document.getElementById("view-thanks").classList.toggle("hidden", currentTab !== "thanks");
+    }
+
+    function renderKPIs(d, totals) {
+      const grid = document.getElementById("kpi-grid");
+      const leaderIdx = totals.candTotals.reduce((bestIdx, val, idx, arr) => (val > arr[bestIdx] ? idx : bestIdx), 0);
+      const leader = d.candidates[leaderIdx];
+      const leaderVotes = totals.candTotals[leaderIdx] || 0;
+
+      grid.innerHTML = `
+        <div class="kpi-card">
+          <div class="kpi-label">目前檢視選舉區</div>
+          <div class="kpi-value">${d.label}</div>
+          <div class="kpi-sub">${d.town}｜${d.quotaNote}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">本選區累計總有效票</div>
+          <div class="kpi-value">${totals.grandTotal.toLocaleString()}</div>
+          <div class="kpi-sub">由各投開票所逐所自動加總</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">投開票所回報進度</div>
+          <div class="kpi-value">${totals.reportedCount} / ${totals.totalStations}</div>
+          <div class="kpi-sub">${d.town}全部投開票所數</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">目前最高票候選人</div>
+          <div class="kpi-value">${totals.grandTotal > 0 ? `${leader.no}號 ${leader.name}` : "尚未開票"}</div>
+          <div class="kpi-sub">${totals.grandTotal > 0 ? `累計 ${leaderVotes.toLocaleString()} 票` : "請於「逐所計票」輸入票數"}</div>
+        </div>
+      `;
+    }
+
+    function renderBoard(d, totals) {
+      document.getElementById("board-title").textContent = `${d.title} — 即時開票看板`;
+      const st = state[d.id];
+      const tbody = document.getElementById("board-tbody");
+      tbody.innerHTML = "";
+
+      // Compute ranks
+      const sortedIndices = d.candidates
+        .map((_, idx) => idx)
+        .sort((a, b) => totals.candTotals[b] - totals.candTotals[a]);
+      const rankMap = {};
+      sortedIndices.forEach((candIdx, pos) => {
+        rankMap[candIdx] = pos + 1;
+      });
+
+      d.candidates.forEach((cand, idx) => {
+        const votes = totals.candTotals[idx];
+        const pct = totals.grandTotal > 0 ? (votes / totals.grandTotal) * 100 : 0;
+        const tr = document.createElement("tr");
+        const statusBadge = votes > 0
+          ? `<span class="badge badge-green">開票統計中</span>`
+          : `<span class="badge badge-gray">尚未開票</span>`;
+
+        tr.innerHTML = `
+          <td class="num-center bold">${cand.no}</td>
+          <td class="bold">${cand.name}</td>
+          <td class="num-center">${cand.party}</td>
+          <td class="num-right bold">${votes.toLocaleString()}</td>
+          <td class="num-right">${pct.toFixed(2)}%</td>
+          <td>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:${Math.min(100, pct).toFixed(1)}%;"></div>
+            </div>
+          </td>
+          <td class="num-center">${statusBadge}</td>
+          <td class="num-center bold">#${rankMap[idx]}</td>
+          <td class="num-center">
+            <select class="status-select elect-select" data-cidx="${idx}">
+              ${["未開票", "計票中", "暫居領先", "當選", "未當選"]
+                .map((opt) => `<option value="${opt}" ${st.electStates[idx] === opt ? "selected" : ""}>${opt}</option>`)
+                .join("")}
+            </select>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      const totalTr = document.createElement("tr");
+      totalTr.className = "total-row";
+      totalTr.innerHTML = `
+        <td class="num-center">合計</td>
+        <td>${d.title} 總有效票</td>
+        <td class="num-center">-</td>
+        <td class="num-right">${totals.grandTotal.toLocaleString()}</td>
+        <td class="num-right">${totals.grandTotal > 0 ? "100.00%" : "0.00%"}</td>
+        <td>-</td>
+        <td class="num-center">${totals.reportedCount}/${totals.totalStations} 已回報</td>
+        <td class="num-center">-</td>
+        <td class="num-center">-</td>
+      `;
+      tbody.appendChild(totalTr);
+
+      tbody.querySelectorAll(".elect-select").forEach((sel) => {
+        sel.addEventListener("change", (e) => {
+          const cIdx = Number(e.target.dataset.cidx);
+          st.electStates[cIdx] = e.target.value;
+        });
+      });
+
+      const banner = document.getElementById("thanks-preview");
+      if (st.thanks.show === "顯示") {
+        banner.classList.remove("hidden");
+        banner.innerHTML = `
+          <h4>${st.thanks.heading}</h4>
+          <p>${st.thanks.body}</p>
+          <div class="thanks-sign">${st.thanks.sign}</div>
+        `;
+      } else {
+        banner.classList.add("hidden");
+      }
+    }
+
+    function renderTally(d) {
+      document.getElementById("tally-title").textContent = `${d.title} — 投開票所逐所計票登錄`;
+      const st = state[d.id];
+      const stations = RAW_DATA.stationsByTown[d.town] || [];
+      const q = (document.getElementById("tally-search").value || "").trim().toLowerCase();
+
+      const thead = document.getElementById("tally-thead");
+      thead.innerHTML = `
+        <tr>
+          <th>行政區</th>
+          <th>投票所編號</th>
+          <th>投票所名稱</th>
+          <th>所屬村里</th>
+          ${d.candidates.map((c) => `<th>${c.no}號 ${c.name}</th>`).join("")}
+          <th>該所有效票合計</th>
+          <th>回報狀態</th>
+        </tr>
+      `;
+
+      const tbody = document.getElementById("tally-tbody");
+      tbody.innerHTML = "";
+
+      const colSums = d.candidates.map(() => 0);
+      let grandSum = 0;
+
+      stations.forEach((s, sIdx) => {
+        const rowVotes = st.votes[sIdx] || d.candidates.map(() => 0);
+        const rowSum = rowVotes.reduce((acc, v) => acc + Number(v || 0), 0);
+        rowVotes.forEach((v, cIdx) => {
+          colSums[cIdx] += Number(v || 0);
+        });
+        grandSum += rowSum;
+
+        const matchText = `${s.code} ${s.name} ${s.village}`.toLowerCase();
+        if (q && !matchText.includes(q)) return;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td class="num-center">${d.town}</td>
+          <td class="num-center">${s.code}</td>
+          <td>${s.name}</td>
+          <td class="num-center">${s.village}</td>
+          ${d.candidates.map((_, cIdx) => `
+            <td class="num-right">
+              <input type="number" min="0" class="vote-input" data-sidx="${sIdx}" data-cidx="${cIdx}" value="${Number(rowVotes[cIdx] || 0)}" />
+            </td>
+          `).join("")}
+          <td class="num-right bold">${rowSum.toLocaleString()}</td>
+          <td class="num-center">
+            <select class="status-select tally-status" data-sidx="${sIdx}">
+              ${["待開票", "開票中", "已回報", "待確認"]
+                .map((opt) => `<option value="${opt}" ${st.statuses[sIdx] === opt ? "selected" : ""}>${opt}</option>`)
+                .join("")}
+            </select>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      const sumTr = document.createElement("tr");
+      sumTr.className = "total-row";
+      sumTr.innerHTML = `
+        <td class="num-center">${d.town}合計</td>
+        <td class="num-center">-</td>
+        <td>共 ${stations.length} 處投開票所</td>
+        <td class="num-center">-</td>
+        ${colSums.map((v) => `<td class="num-right">${v.toLocaleString()}</td>`).join("")}
+        <td class="num-right">${grandSum.toLocaleString()}</td>
+        <td class="num-center">${st.statuses.filter((x) => x === "已回報").length}/${stations.length} 已回報</td>
+      `;
+      tbody.appendChild(sumTr);
+
+      tbody.querySelectorAll(".vote-input").forEach((inp) => {
+        inp.addEventListener("change", (e) => {
+          const sIdx = Number(e.target.dataset.sidx);
+          const cIdx = Number(e.target.dataset.cidx);
+          const val = Math.max(0, parseInt(e.target.value || "0", 10) || 0);
+          st.votes[sIdx][cIdx] = val;
+          renderAll();
+        });
+      });
+
+      tbody.querySelectorAll(".tally-status").forEach((sel) => {
+        sel.addEventListener("change", (e) => {
+          const sIdx = Number(e.target.dataset.sidx);
+          st.statuses[sIdx] = e.target.value;
+          renderKPIs(d, getDistrictTotals(d));
+        });
+      });
+    }
+
+    function renderStations(d) {
+      document.getElementById("stations-title").textContent = `${d.town} 投開票所名冊與鄰別（共 ${(RAW_DATA.stationsByTown[d.town] || []).length} 處）`;
+      const stations = RAW_DATA.stationsByTown[d.town] || [];
+      const q = (document.getElementById("station-search").value || "").trim().toLowerCase();
+      const tbody = document.getElementById("stations-tbody");
+      tbody.innerHTML = "";
+
+      stations
+        .filter((s) => {
+          if (!q) return true;
+          return `${s.code} ${s.name} ${s.address} ${s.village} ${s.neighbors} ${s.indigenous}`.toLowerCase().includes(q);
+        })
+        .forEach((s) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td class="num-center">${d.town}</td>
+            <td class="num-center">${s.code}</td>
+            <td class="bold">${s.name}</td>
+            <td>${s.address}</td>
+            <td class="num-center">${s.village}</td>
+            <td>${s.neighbors}</td>
+            <td class="num-center">${s.indigenous}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+    }
+
+    function renderThanksForm(d) {
+      const st = state[d.id];
+      document.getElementById("thanks-title").textContent = `${d.title} — 致謝設定`;
+      document.getElementById("cfg-thanks-show").value = st.thanks.show;
+      document.getElementById("cfg-thanks-heading").value = st.thanks.heading;
+      document.getElementById("cfg-thanks-sign").value = st.thanks.sign;
+      document.getElementById("cfg-thanks-body").value = st.thanks.body;
+    }
+
+    function renderAll() {
+      const d = getCurrentDistrict();
+      const totals = getDistrictTotals(d);
+      document.getElementById("header-subtitle").textContent = d.subtitle;
+      renderSwitcher();
+      renderKPIs(d, totals);
+      renderBoard(d, totals);
+      renderTally(d);
+      renderStations(d);
+      renderThanksForm(d);
+    }
+
+    function switchDistrict(id) {
+      currentDistrictId = id;
+      renderAll();
+    }
+
+    function exportCurrentCSV() {
+      const d = getCurrentDistrict();
+      const st = state[d.id];
+      const stations = RAW_DATA.stationsByTown[d.town] || [];
+      const headers = ["行政區", "投票所編號", "投票所名稱", "所屬村里", ...d.candidates.map((c) => `${c.no}號_${c.name}`), "該所有效票合計", "回報狀態"];
+      const lines = [headers.join(",")];
+      stations.forEach((s, sIdx) => {
+        const rv = st.votes[sIdx] || d.candidates.map(() => 0);
+        const sum = rv.reduce((a, b) => a + Number(b || 0), 0);
+        lines.push([d.town, s.code, `"${s.name}"`, s.village, ...rv, sum, st.statuses[sIdx]].join(","));
+      });
+      const blob = new Blob(["\uFEFF" + lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${d.label.replace(/\s+/g, "_")}_逐所計票.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // Event bindings
+    document.getElementById("district-select").addEventListener("change", (e) => switchDistrict(e.target.value));
+    document.querySelectorAll(".tab-btn").forEach((b) => {
+      b.addEventListener("click", () => {
+        currentTab = b.dataset.tab;
+        renderSwitcher();
+      });
+    });
+    document.getElementById("tally-search").addEventListener("input", () => renderTally(getCurrentDistrict()));
+    document.getElementById("station-search").addEventListener("input", () => renderStations(getCurrentDistrict()));
+    document.getElementById("btn-export-csv").addEventListener("click", exportCurrentCSV);
+
+    document.getElementById("btn-sim-votes").addEventListener("click", () => {
+      const d = getCurrentDistrict();
+      const st = state[d.id];
+      const stations = RAW_DATA.stationsByTown[d.town] || [];
+      stations.forEach((_, sIdx) => {
+        st.votes[sIdx] = d.candidates.map((__, cIdx) => ((sIdx + 1) * 13 + (cIdx + 1) * 7) % 85);
+        st.statuses[sIdx] = "已回報";
+      });
+      renderAll();
+    });
+
+    document.getElementById("btn-reset-votes").addEventListener("click", () => {
+      const d = getCurrentDistrict();
+      const st = state[d.id];
+      const stations = RAW_DATA.stationsByTown[d.town] || [];
+      st.votes = stations.map(() => d.candidates.map(() => 0));
+      st.statuses = stations.map(() => "待開票");
+      renderAll();
+    });
+
+    ["cfg-thanks-show", "cfg-thanks-heading", "cfg-thanks-sign", "cfg-thanks-body"].forEach((id) => {
+      document.getElementById(id).addEventListener("input", () => {
+        const d = getCurrentDistrict();
+        const st = state[d.id];
+        st.thanks.show = document.getElementById("cfg-thanks-show").value;
+        st.thanks.heading = document.getElementById("cfg-thanks-heading").value;
+        st.thanks.sign = document.getElementById("cfg-thanks-sign").value;
+        st.thanks.body = document.getElementById("cfg-thanks-body").value;
+        renderBoard(d, getDistrictTotals(d));
+      });
+    });
+
+    initState();
+    renderAll();
+  </script>
+</body>
+</html>
