@@ -689,7 +689,7 @@
           </div>
         </div>
         <div class="form-actions">
-          <button type="submit" class="btn-primary" id="saveDistrictBtn">儲存並切換至此選區</button>
+          <button type="submit" class="btn-primary" id="saveDistrictBtn">儲存並切換至此選區</button>                                              
           <button type="button" class="btn-secondary" id="saveOnlyBtn">僅儲存</button>
         </div>
         <div class="drawer-feedback" id="drawerFeedback" role="status" aria-live="polite"></div>
@@ -1382,15 +1382,7 @@
     setFeedback(`已載入「${district.label}」設定，修改後可儲存。`, false);
   }
 
-  function clearDistrictForm() {
-    document.getElementById('editDistrictId').value = '';
-    document.getElementById('districtForm').reset();
-    document.getElementById('cfgSummarySheet').value = '即時看板總表';
-    document.getElementById('cfgStationsSheet').value = '投開票所逐所計票';
-    document.getElementById('cfgThanksSheet').value = '致謝設定';
-    document.getElementById('cfgStationRange').value = '1-999';
-    setFeedback('', false);
-  }
+
 
   function setFeedback(msg, isWarn) {
     const el = document.getElementById('drawerFeedback');
