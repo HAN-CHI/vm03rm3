@@ -605,6 +605,91 @@
     border-color: #f87171;
     color: #fca5a5;
   }
+
+  /* 新增 / 編輯選區設定表單 */
+  .config-card {
+    background: rgba(15, 23, 42, 0.72);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 15px;
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .form-group.full {
+    grid-column: span 2;
+  }
+  .form-group label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 700;
+  }
+  .form-group input {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    background: #0f172a;
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 0.88rem;
+  }
+  .form-group input:focus {
+    outline: none;
+    border-color: var(--accent-gold);
+  }
+  .form-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .btn-primary {
+    flex: 1;
+    padding: 9px 14px;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #0f172a;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: filter 0.15s ease;
+  }
+  .btn-primary:hover {
+    filter: brightness(1.08);
+  }
+  .btn-secondary {
+    padding: 9px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    color: #cbd5e1;
+    font-family: inherit;
+    font-size: 0.86rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .btn-secondary:hover {
+    border-color: #94a3b8;
+    color: #fff;
+  }
+  .drawer-feedback {
+    margin-top: 8px;
+    font-size: 0.82rem;
+    color: var(--accent-green);
+    min-height: 18px;
+  }
+  .drawer-feedback.warn {
+    color: var(--accent-amber);
+  }
 </style>
 </head>
 <body>
@@ -639,6 +724,8 @@
 
     <div class="config-card">
       <div class="drawer-section-label" style="margin-bottom: 12px;">
+        <span id="formHeading">新增 / 編輯選區設定</span>
+        <button type="button" class="btn-mini" id="clearFormBtn">清空表單</button>
       </div>
       <form id="districtForm">
         <input type="hidden" id="editDistrictId">
@@ -689,7 +776,7 @@
           </div>
         </div>
         <div class="form-actions">
-          <button type="submit" class="btn-primary" id="saveDistrictBtn">儲存並切換至此選區</button>                                              
+          <button type="submit" class="btn-primary" id="saveDistrictBtn">儲存並切換至此選區</button>
           <button type="button" class="btn-secondary" id="saveOnlyBtn">僅儲存</button>
         </div>
         <div class="drawer-feedback" id="drawerFeedback" role="status" aria-live="polite"></div>
@@ -1382,7 +1469,16 @@
     setFeedback(`已載入「${district.label}」設定，修改後可儲存。`, false);
   }
 
-
+  function clearDistrictForm() {
+    document.getElementById('editDistrictId').value = '';
+    document.getElementById('formHeading').innerText = '新增 / 編輯選區設定';
+    document.getElementById('districtForm').reset();
+    document.getElementById('cfgSummarySheet').value = '即時看板總表';
+    document.getElementById('cfgStationsSheet').value = '投開票所逐所計票';
+    document.getElementById('cfgThanksSheet').value = '致謝設定';
+    document.getElementById('cfgStationRange').value = '1-999';
+    setFeedback('', false);
+  }
 
   function setFeedback(msg, isWarn) {
     const el = document.getElementById('drawerFeedback');
