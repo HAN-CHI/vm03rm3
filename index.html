@@ -1427,7 +1427,7 @@
             ${isActive ? '目前正在同步此選區' : '切換至此選區'}
           </button>
           <button type="button" class="btn-mini" data-action="edit" data-id="${escapeHtml(d.id)}">編輯</button>
-          ${canDelete ? `<button type="button" class="btn-mini danger" data-action="delete" data-id="${escapeHtml(d.id)}">刪除</button>` : ''}
+          ${canDelete ? `<button type="button" class="btn-mini danger" data-action="delete" data-id="${escapeHtml(d.id)}"''}
         </div>
       `;
       listContainer.appendChild(card);
