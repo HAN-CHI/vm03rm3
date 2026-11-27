@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>苗栗縣第21屆議員選舉（第3選區：通霄鎮、苑裡鎮）即時看板</title>
+<style>
+  :root {
+    --bg-dark: #0f172a;
+    --card-bg: #1e293b;
+    --card-border: #334155;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --accent-gold: #fbbf24;
+    --accent-blue: #38bdf8;
+    --accent-teal: #2dd4bf;
+    --accent-green: #4ade80;
+    --accent-amber: #facc15;
+    --dpp-green: #16a34a;
+    --indep-slate: #475569;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-main);
+    padding: 20px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  header {
+    text-align: center;
+    padding-bottom: 18px;
+    border-bottom: 2px solid var(--card-border);
+    margin-bottom: 24px;
+  }
+  header h1 {
+    font-size: 2.2rem;
+    color: var(--accent-gold);
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+  .meta-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 18px;
+    font-size: 1.05rem;
+    color: var(--text-muted);
+  }
+  .meta-bar span strong { color: #fff; }
+  .turnout-highlight {
+    color: var(--accent-teal) !important;
+    font-size: 1.15rem;
+  }
+  .status-summary-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 14px;
+  }
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    border-radius: 10px;
+    font-size: 1.02rem;
+    font-weight: bold;
+    background: rgba(30, 41, 59, 0.9);
+    border: 1px solid var(--card-border);
+    color: var(--text-main);
+  }
+  .status-pill.completed {
+    border-color: rgba(74, 222, 128, 0.55);
+    background: rgba(22, 163, 74, 0.16);
+  }
+  .status-pill.completed strong {
+    color: var(--accent-green);
+    font-size: 1.2rem;
+  }
+  .status-pill.pending {
+    border-color: rgba(250, 204, 21, 0.55);
+    background: rgba(234, 179, 8, 0.14);
+  }
+  .status-pill.pending strong {
+    color: var(--accent-amber);
+    font-size: 1.2rem;
+  }
+  .status-pill.total-stations strong {
+    color: var(--accent-blue);
+    font-size: 1.15rem;
+  }
+  .live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(22, 163, 74, 0.2);
+    color: #4ade80;
+    padding: 3px 12px;
+    border-radius: 999px;
+    font-weight: bold;
+    border: 1px solid #22c55e;
+  }
+  .live-badge.error {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+    border-color: #ef4444;
+  }
+  .dot {
+    width: 10px;
+    height: 10px;
+    background: #22c55e;
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+  }
+  .live-badge.error .dot { background: #ef4444; }
+  @keyframes pulse {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(1.2); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+    gap: 18px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 20px;
+    position: relative;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.35);
+    transition: transform 0.2s ease;
+  }
+  .card.top-rank {
+    border: 2px solid var(--accent-gold);
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.25);
+  }
+
+  /* 1 號候選人專屬放大框架與字體 */
+  .card.featured-cand {
+    grid-column: span 2;
+    padding: 26px;
+    border-width: 2px;
+  }
+  .card.featured-cand .no-badge {
+    width: 56px;
+    height: 56px;
+    font-size: 1.95rem;
+  }
+  .card.featured-cand .cand-name {
+    font-size: 2.5rem;
+  }
+  .card.featured-cand .party-tag {
+    font-size: 1.15rem;
+    padding: 6px 16px;
+  }
+  .card.featured-cand .votes-box {
+    padding: 20px;
+  }
+  .card.featured-cand .votes-num {
+    font-size: 4.2rem;
+  }
+  .card.featured-cand .votes-sub {
+    font-size: 1.15rem;
+  }
+  .card.featured-cand .status-bar,
+  .card.featured-cand .rate-pill {
+    font-size: 1.12rem;
+  }
+  @media (max-width: 768px) {
+    .card.featured-cand {
+      grid-column: span 1;
+      padding: 20px;
+    }
+    .card.featured-cand .votes-num {
+      font-size: 3.4rem;
+    }
+  }
+
+  /* 當選特別視覺變化（明顯易懂） */
+  .card.elected-highlight {
+    background: linear-gradient(150deg, #3b1214 0%, #2a1812 50%, #1e293b 100%);
+    border: 3px solid #fbbf24;
+    box-shadow: 0 0 28px rgba(251, 191, 36, 0.65), 0 0 14px rgba(239, 68, 68, 0.55);
+  }
+  .elected-ribbon {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #ef4444, #b91c1c);
+    color: #fef08a;
+    border: 2px solid #fbbf24;
+    padding: 4px 14px;
+    border-radius: 999px;
+    font-size: 1.05rem;
+    font-weight: 900;
+    letter-spacing: 1px;
+    box-shadow: 0 3px 10px rgba(220, 38, 38, 0.6);
+    margin-bottom: 10px;
+  }
+  .card.featured-cand .elected-ribbon {
+    font-size: 1.25rem;
+    padding: 6px 18px;
+  }
+  .card.elected-highlight .no-badge {
+    background: #dc2626;
+    color: #fef08a;
+    border: 2px solid #fbbf24;
+  }
+  .card.elected-highlight .votes-box {
+    background: rgba(127, 29, 29, 0.5);
+    border: 1px solid rgba(251, 191, 36, 0.45);
+  }
+  .card.elected-highlight .votes-num {
+    color: #fde047;
+  }
+  .card.elected-highlight .rate-pill {
+    background: rgba(251, 191, 36, 0.25);
+    color: #fde047;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .cand-id-name {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .no-badge {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--accent-gold);
+    color: #0f172a;
+    font-size: 1.5rem;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .cand-name {
+    font-size: 1.85rem;
+    font-weight: 800;
+  }
+  .party-tag {
+    padding: 4px 12px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: bold;
+    background: var(--indep-slate);
+  }
+  .party-dpp { background: var(--dpp-green); }
+  .votes-box {
+    background: rgba(15, 23, 42, 0.65);
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+  .votes-num {
+    font-size: 3.1rem;
+    font-weight: 900;
+    color: var(--accent-blue);
+    line-height: 1.1;
+  }
+  .votes-sub {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed #334155;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+  }
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.95rem;
+    color: #cbd5e1;
+  }
+  .rate-pill {
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--accent-blue);
+    padding: 2px 10px;
+    border-radius: 6px;
+    font-weight: bold;
+  }
+
+  /* 致謝區塊：支援儲存格內換行與多列延伸 */
+  .thanks-section {
+    max-width: 1400px;
+    margin: 24px auto 0;
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.96), rgba(15, 23, 42, 0.96));
+    border: 1px solid rgba(251, 191, 36, 0.45);
+    border-radius: 14px;
+    padding: 22px 26px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+    text-align: center;
+  }
+  .thanks-section.hidden {
+    display: none;
+  }
+  .thanks-title {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: var(--accent-gold);
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+  }
+  .thanks-body {
+    font-size: 1.15rem;
+    line-height: 1.8;
+    color: var(--text-main);
+    white-space: pre-line;
+    word-break: break-word;
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 24px;
+    color: yellow;
+    font-size: 0.9rem;
+  }
+
+  /* 右側隱藏式「代表選區」邊緣標籤與滑出抽屜 */
+  .edge-toggle-tab {
+    position: fixed;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 950;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 9px;
+    background: linear-gradient(180deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.98));
+    color: var(--accent-gold);
+    border: 1px solid rgba(251, 191, 36, 0.55);
+    border-right: none;
+    border-radius: 12px 0 0 12px;
+    box-shadow: -4px 6px 20px rgba(0, 0, 0, 0.45);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.92rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    opacity: 0.86;
+    transition: opacity 0.2s ease, transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  }
+  .edge-toggle-tab:hover,
+  .edge-toggle-tab:focus-visible {
+    opacity: 1;
+    border-color: var(--accent-gold);
+    background: linear-gradient(180deg, rgba(51, 65, 85, 0.98), rgba(15, 23, 42, 1));
+    outline: none;
+  }
+  .edge-toggle-tab .tab-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent-green);
+    box-shadow: 0 0 8px rgba(74, 222, 128, 0.8);
+  }
+
+  .drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 6, 23, 0.65);
+    backdrop-filter: blur(2px);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+  }
+  .drawer-backdrop.open {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .district-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: min(440px, 92vw);
+    height: 100vh;
+    background: #131c31;
+    border-left: 1px solid rgba(251, 191, 36, 0.4);
+    box-shadow: -12px 0 36px rgba(0, 0, 0, 0.65);
+    z-index: 1050;
+    transform: translateX(100%);
+    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .district-drawer.open {
+    transform: translateX(0);
+  }
+
+  .drawer-header {
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--card-border);
+    background: rgba(15, 23, 42, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .drawer-title-group h2 {
+    font-size: 1.25rem;
+    color: var(--accent-gold);
+    font-weight: 800;
+  }
+  .drawer-title-group p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .drawer-close-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    color: var(--text-main);
+    font-size: 1.25rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .drawer-close-btn:hover {
+    background: #334155;
+    border-color: var(--accent-gold);
+  }
+
+  .drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px 20px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .drawer-section-label {
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: var(--accent-blue);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .district-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .district-item {
+    background: rgba(30, 41, 59, 0.85);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 13px 14px;
+    transition: border-color 0.18s ease, background 0.18s ease, transform 0.15s ease;
+  }
+  .district-item:hover {
+    border-color: rgba(56, 189, 248, 0.65);
+    background: rgba(30, 41, 59, 1);
+  }
+  .district-item.active {
+    border-color: var(--accent-gold);
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.14), rgba(30, 41, 59, 0.96));
+    box-shadow: 0 0 16px rgba(251, 191, 36, 0.18);
+  }
+
+  .district-item-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .district-item-name {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text-main);
+    line-height: 1.35;
+  }
+  .district-badges {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .badge-active {
+    background: rgba(251, 191, 36, 0.22);
+    color: var(--accent-gold);
+    border: 1px solid rgba(251, 191, 36, 0.6);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.76rem;
+    font-weight: 800;
+  }
+  .badge-template {
+    background: rgba(148, 163, 184, 0.16);
+    color: #cbd5e1;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 700;
+  }
+  .badge-custom {
+    background: rgba(45, 212, 191, 0.16);
+    color: var(--accent-teal);
+    border: 1px solid rgba(45, 212, 191, 0.4);
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 700;
+  }
+
+  .district-item-meta {
+    font-size: 0.84rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+  .district-item-meta code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.78rem;
+    color: #cbd5e1;
+    background: rgba(15, 23, 42, 0.7);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+
+  .district-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .btn-switch {
+    flex: 1;
+    padding: 7px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(56, 189, 248, 0.5);
+    background: rgba(56, 189, 248, 0.15);
+    color: #e0f2fe;
+    font-family: inherit;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .btn-switch:hover {
+    background: rgba(56, 189, 248, 0.28);
+    border-color: var(--accent-blue);
+  }
+  .district-item.active .btn-switch {
+    background: rgba(251, 191, 36, 0.22);
+    border-color: var(--accent-gold);
+    color: #fef08a;
+  }
+  .btn-mini {
+    padding: 7px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--card-border);
+    background: rgba(15, 23, 42, 0.75);
+    color: #cbd5e1;
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+  .btn-mini:hover {
+    border-color: var(--accent-blue);
+    color: #fff;
+  }
+  .btn-mini.danger:hover {
+    border-color: #f87171;
+    color: #fca5a5;
+  }
+
+  /* 新增 / 編輯選區設定表單 */
+  .config-card {
+    background: rgba(15, 23, 42, 0.72);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 15px;
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .form-group.full {
+    grid-column: span 2;
+  }
+  .form-group label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 700;
+  }
+  .form-group input {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    background: #0f172a;
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 0.88rem;
+  }
+  .form-group input:focus {
+    outline: none;
+    border-color: var(--accent-gold);
+  }
+  .form-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .btn-primary {
+    flex: 1;
+    padding: 9px 14px;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #0f172a;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: filter 0.15s ease;
+  }
+  .btn-primary:hover {
+    filter: brightness(1.08);
+  }
+  .btn-secondary {
+    padding: 9px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    color: #cbd5e1;
+    font-family: inherit;
+    font-size: 0.86rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .btn-secondary:hover {
+    border-color: #94a3b8;
+    color: #fff;
+  }
+  .drawer-feedback {
+    margin-top: 8px;
+    font-size: 0.82rem;
+    color: var(--accent-green);
+    min-height: 18px;
+  }
+  .drawer-feedback.warn {
+    color: var(--accent-amber);
+  }
+</style>
+</head>
+<body>
+
+<!-- 右側邊緣隱藏式切換標籤（預設收合，不遮擋主畫面） -->
+<button type="button" class="edge-toggle-tab" id="drawerToggleBtn" aria-label="開啟代表選區切換選單" aria-expanded="false" aria-controls="districtDrawer">
+  <span class="tab-indicator" aria-hidden="true"></span>
+  <span>代表選區</span>
+</button>
+
+<!-- 抽屜遮罩層 -->
+<div class="drawer-backdrop" id="drawerBackdrop" aria-hidden="true"></div>
+
+<!-- 右側滑出選區切換抽屜 -->
+<aside class="district-drawer" id="districtDrawer" aria-label="代表選區切換與設定面板" aria-hidden="true">
+  <div class="drawer-header">
+    <div class="drawer-title-group">
+      <h2>代表選區切換</h2>
+      <p>切換即時同步的 Google 試算表選區（按 Esc 可關閉）</p>
+    </div>
+    <button type="button" class="drawer-close-btn" id="drawerCloseBtn" aria-label="關閉選區選單">✕</button>
+  </div>
+
+  <div class="drawer-body">
+    <div>
+      <div class="drawer-section-label">
+        <span>可切換選區清單</span>
+        <button type="button" class="btn-mini" id="resetDefaultDistrictsBtn" title="還原預設選區設定">還原預設</button>
+      </div>
+      <div class="district-list" id="districtList"></div>
+    </div>
+
+    <div class="config-card">
+      <div class="drawer-section-label" style="margin-bottom: 12px;">
+        <span id="formHeading">新增 / 編輯選區設定</span>
+        <button type="button" class="btn-mini" id="clearFormBtn">清空表單</button>
+      </div>
+      <form id="districtForm">
+        <input type="hidden" id="editDistrictId">
+        <div class="form-grid">
+          <div class="form-group full">
+            <label for="cfgDistrictLabel">選區顯示名稱（例如：第3選區（通霄鎮、苑裡鎮））*</label>
+            <input type="text" id="cfgDistrictLabel" required placeholder="請輸入代表選區名稱">
+          </div>
+          <div class="form-group full">
+            <label for="cfgHeaderTitle">主標題文字（留空則自動依選區名稱產生）</label>
+            <input type="text" id="cfgHeaderTitle" placeholder="苗栗縣議會第21屆議員選舉 — ...">
+          </div>
+          <div class="form-group full">
+            <label for="cfgSheetId">Google 試算表 ID *</label>
+            <input type="text" id="cfgSheetId" required placeholder="貼上試算表網址中的 Sheet ID">
+          </div>
+          <div class="form-group">
+            <label for="cfgSummarySheet">總表分頁名稱</label>
+            <input type="text" id="cfgSummarySheet" value="即時看板總表">
+          </div>
+          <div class="form-group">
+            <label for="cfgStationsSheet">逐所分頁名稱</label>
+            <input type="text" id="cfgStationsSheet" value="投開票所逐所計票">
+          </div>
+          <div class="form-group">
+            <label for="cfgThanksSheet">致謝分頁名稱</label>
+            <input type="text" id="cfgThanksSheet" value="致謝設定">
+          </div>
+          <div class="form-group">
+            <label for="cfgEligibleVoters">選舉人數（數字）*</label>
+            <input type="number" id="cfgEligibleVoters" min="1" required placeholder="63384">
+          </div>
+          <div class="form-group full">
+            <label for="cfgEligibleSub">選舉人數副標說明</label>
+            <input type="text" id="cfgEligibleSub" placeholder="63,384 人（通霄 26,660 / 苑裡 36,724）">
+          </div>
+          <div class="form-group">
+            <label for="cfgTotalStations">投開票所總數 *</label>
+            <input type="number" id="cfgTotalStations" min="1" required placeholder="75">
+          </div>
+          <div class="form-group">
+            <label for="cfgStationRange">票所編號範圍（起-迄）</label>
+            <input type="text" id="cfgStationRange" placeholder="161-235">
+          </div>
+          <div class="form-group full">
+            <label for="cfgStationsSub">投開票所副標說明</label>
+            <input type="text" id="cfgStationsSub" placeholder="75 所（通霄 35 / 苑裡 40）">
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" id="saveDistrictBtn">儲存並切換至此選區</button>
+          <button type="button" class="btn-secondary" id="saveOnlyBtn">僅儲存</button>
+        </div>
+        <div class="drawer-feedback" id="drawerFeedback" role="status" aria-live="polite"></div>
+      </form>
+    </div>
+  </div>
+</aside>
+
+<header>
+  <h1 id="mainTitle">苗栗縣議會第21屆議員選舉 — 第3選區（通霄鎮、苑裡鎮）</h1>
+  <div class="meta-bar">
+    <span class="live-badge" id="connBadge"><span class="dot"></span><span id="connText">雲端即時同步中（每 5 秒更新）</span></span>
+    <span>選區選舉人數：<strong id="eligibleDisplay">63,384 人（通霄 26,660 / 苑裡 36,724）</strong></span>
+    <span>總有效票累計：<strong id="totalVotes">0</strong> 票</span>
+    <span>估算投票率：<strong id="turnoutRate" class="turnout-highlight">0.00%</strong></span>
+    <span>最後更新：<strong id="lastUpdate">--:--:--</strong></span>
+  </div>
+  <div class="status-summary-bar" id="stationStatusBar">
+    <span class="status-pill completed">回報完成：<strong id="completedCount">0</strong> 所</span>
+    <span class="status-pill pending">待開票：<strong id="pendingCount">75</strong> 所</span>
+    <span class="status-pill total-stations">投開票所總數：<strong id="stationsDisplay">75 所（通霄 35 / 苑裡 40）</strong></span>
+  </div>
+  <section class="thanks-section" id="thanksSection">
+    <div class="thanks-title" id="thanksTitle">感謝通霄、苑裡鄉親的支持與肯定</div>
+    <div class="thanks-body" id="thanksBody">感謝所有志工夥伴、助選團隊與各投開票所回報人員的辛勞付出，讓開票資訊即時透明呈現！</div>
+  </section>
+</header>
+
+<main class="grid" id="board"></main>
+
+<footer>
+說明：本看板直接連線翁杰服務處 Google 試算表「即時看板總表」與「致謝設定」，即時統計回報完成與待開票所數，支援多服務處電視牆與手機同步檢視；投票率預設以「總有效票 ÷ 第3選區選舉人數（63,384）」即時估算。
+</footer>  
+<footer>
+本站以監票自行回報為主。票數由志工回報，可能有誤，選舉結果以中選會公告為準。
+</footer>  
+<footer>
+規劃：彭勇智 | 設計：劉翰錡
+</footer>
+
+<script>
+  const REFRESH_SECONDS = 5;
+  const STORAGE_KEY_DISTRICTS = 'miaoli_election_districts_v1';
+  const STORAGE_KEY_ACTIVE_ID = 'miaoli_election_active_district_id_v1';
+
+  const DEFAULT_THANKS = {
+    title: '感謝通霄、苑裡鄉親的支持與肯定',
+    body: '感謝所有志工夥伴、助選團隊與各投開票所回報人員的辛勞付出，讓開票資訊即時透明呈現！',
+    visible: true
+  };
+
+  const DEFAULT_DATA = [
+    { no: '1', name: '翁杰', party: '民主進步黨', votes: 0, rate: '0.00%', note: '開票統計中', tongxiao: 0, yuanli: 0, electedStatus: '' },
+    { no: '2', name: '王建鑫', party: '無', votes: 0, rate: '0.00%', note: '開票統計中', tongxiao: 0, yuanli: 0, electedStatus: '' },
+    { no: '3', name: '徐瑞轅', party: '無', votes: 0, rate: '0.00%', note: '開票統計中', tongxiao: 0, yuanli: 0, electedStatus: '' },
+    { no: '4', name: '郭汶沂', party: '無', votes: 0, rate: '0.00%', note: '開票統計中', tongxiao: 0, yuanli: 0, electedStatus: '' },
+    { no: '5', name: '杜文卿', party: '民主進步黨', votes: 0, rate: '0.00%', note: '開票統計中', tongxiao: 0, yuanli: 0, electedStatus: '' },
+    { no: '6', name: '陳薈茗', party: '無', votes: 0, rate: '0.00%', note: '開票統計中', tongxiao: 0, yuanli: 0, electedStatus: '' },
+    { no: '7', name: '周玉滿', party: '無', votes: 0, rate: '0.00%', note: '開票統計中', tongxiao: 0, yuanli: 0, electedStatus: '' }
+  ];
+
+  // 預設代表選區設定（第3選區為完整正式設定，其餘為可設定/範本選區）
+  const INITIAL_DISTRICTS = [
+    {
+      id: 'miaoli-3',
+      label: '第3選區（通霄鎮、苑裡鎮）',
+      pageTitle: '苗栗縣第21屆議員選舉（第3選區：通霄鎮、苑裡鎮）即時看板',
+      headerTitle: '苗栗縣議會第21屆議員選舉 — 第3選區（通霄鎮、苑裡鎮）',
+      sheetId: '1W1kSyw6XhQJ_VsaM1q5TZxMrwIj8J1rw',
+      summarySheetName: '即時看板總表',
+      stationsSheetName: '投開票所逐所計票',
+      thanksSheetName: '致謝設定',
+      eligibleVoters: 63384,
+      eligibleSubtext: '63,384 人（通霄 26,660 / 苑裡 36,724）',
+      totalStations: 75,
+      stationsSubtext: '75 所（通霄 35 / 苑裡 40）',
+      stationMin: 161,
+      stationMax: 235,
+      isTemplate: false,
+      isCustom: false
+    },
+    {
+      id: 'miaoli-1-sample',
+      label: '第1選區（苗栗市、公館鄉、頭屋鄉）',
+      pageTitle: '苗栗縣第21屆議員選舉（第1選區：苗栗市、公館鄉、頭屋鄉）即時看板',
+      headerTitle: '苗栗縣議會第21屆議員選舉 — 第1選區（苗栗市、公館鄉、頭屋鄉）',
+      sheetId: '',
+      summarySheetName: '即時看板總表',
+      stationsSheetName: '投開票所逐所計票',
+      thanksSheetName: '致謝設定',
+      eligibleVoters: 105000,
+      eligibleSubtext: '105,000 人（可於設定面板填入實際數據）',
+      totalStations: 110,
+      stationsSubtext: '110 所（範本選區）',
+      stationMin: 1,
+      stationMax: 999,
+      isTemplate: true,
+      isCustom: false
+    },
+    {
+      id: 'miaoli-4-sample',
+      label: '第4選區（後龍鎮、造橋鄉、竹南鎮）',
+      pageTitle: '苗栗縣第21屆議員選舉（第4選區：後龍鎮、造橋鄉、竹南鎮）即時看板',
+      headerTitle: '苗栗縣議會第21屆議員選舉 — 第4選區（後龍鎮、造橋鄉、竹南鎮）',
+      sheetId: '',
+      summarySheetName: '即時看板總表',
+      stationsSheetName: '投開票所逐所計票',
+      thanksSheetName: '致謝設定',
+      eligibleVoters: 112000,
+      eligibleSubtext: '112,000 人（可於設定面板填入實際數據）',
+      totalStations: 105,
+      stationsSubtext: '105 所（範本選區）',
+      stationMin: 1,
+      stationMax: 999,
+      isTemplate: true,
+      isCustom: false
+    },
+    {
+      id: 'miaoli-5-sample',
+      label: '第5選區（頭份市、三灣鄉、南庄鄉）',
+      pageTitle: '苗栗縣第21屆議員選舉（第5選區：頭份市、三灣鄉、南庄鄉）即時看板',
+      headerTitle: '苗栗縣議會第21屆議員選舉 — 第5選區（頭份市、三灣鄉、南庄鄉）',
+      sheetId: '',
+      summarySheetName: '即時看板總表',
+      stationsSheetName: '投開票所逐所計票',
+      thanksSheetName: '致謝設定',
+      eligibleVoters: 98000,
+      eligibleSubtext: '98,000 人（可於設定面板填入實際數據）',
+      totalStations: 96,
+      stationsSubtext: '96 所（範本選區）',
+      stationMin: 1,
+      stationMax: 999,
+      isTemplate: true,
+      isCustom: false
+    }
+  ];
+
+  let districts = [];
+  let activeDistrictId = 'miaoli-3';
+  let pollTimerId = null;
+  let activeFetchSeq = 0;
+
+  function cloneInitialDistricts() {
+    return INITIAL_DISTRICTS.map(d => ({ ...d }));
+  }
+
+  function loadDistrictsFromStorage() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_DISTRICTS);
+      if (!raw) return cloneInitialDistricts();
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed) || parsed.length === 0) return cloneInitialDistricts();
+
+      // 確保預設第3選區永遠存在
+      const hasMiaoli3 = parsed.some(d => d.id === 'miaoli-3');
+      const normalized = parsed.map(d => ({
+        id: String(d.id || `custom-${Date.now()}`),
+        label: String(d.label || '未命名選區'),
+        pageTitle: String(d.pageTitle || `苗栗縣議員選舉（${d.label || '未命名選區'}）即時看板`),
+        headerTitle: String(d.headerTitle || `苗栗縣議會第21屆議員選舉 — ${d.label || '未命名選區'}`),
+        sheetId: String(d.sheetId || '').trim(),
+        summarySheetName: String(d.summarySheetName || '即時看板總表').trim(),
+        stationsSheetName: String(d.stationsSheetName || '投開票所逐所計票').trim(),
+        thanksSheetName: String(d.thanksSheetName || '致謝設定').trim(),
+        eligibleVoters: Math.max(1, parseInt(d.eligibleVoters, 10) || 63384),
+        eligibleSubtext: String(d.eligibleSubtext || `${(parseInt(d.eligibleVoters, 10) || 63384).toLocaleString()} 人`),
+        totalStations: Math.max(1, parseInt(d.totalStations, 10) || 75),
+        stationsSubtext: String(d.stationsSubtext || `${Math.max(1, parseInt(d.totalStations, 10) || 75)} 所`),
+        stationMin: Number.isFinite(parseInt(d.stationMin, 10)) ? parseInt(d.stationMin, 10) : 1,
+        stationMax: Number.isFinite(parseInt(d.stationMax, 10)) ? parseInt(d.stationMax, 10) : 9999,
+        isTemplate: Boolean(d.isTemplate),
+        isCustom: Boolean(d.isCustom)
+      }));
+
+      if (!hasMiaoli3) {
+        normalized.unshift({ ...INITIAL_DISTRICTS[0] });
+      }
+      return normalized;
+    } catch (err) {
+      console.error('讀取本地選區設定失敗:', err);
+      return cloneInitialDistricts();
+    }
+  }
+
+  function saveDistrictsToStorage() {
+    try {
+      localStorage.setItem(STORAGE_KEY_DISTRICTS, JSON.stringify(districts));
+      localStorage.setItem(STORAGE_KEY_ACTIVE_ID, activeDistrictId);
+    } catch (err) {
+      console.error('儲存選區設定失敗:', err);
+    }
+  }
+
+  function getActiveDistrict() {
+    return districts.find(d => d.id === activeDistrictId) || districts[0];
+  }
+
+  // 完整多行 CSV 解析器（支援儲存格內包含換行字元）
+  function parseCSV(csvText) {
+    const rows = [];
+    let currentRow = [];
+    let currentCell = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < csvText.length; i++) {
+      const ch = csvText[i];
+      if (ch === '"') {
+        if (inQuotes && csvText[i + 1] === '"') {
+          currentCell += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (ch === ',' && !inQuotes) {
+        currentRow.push(currentCell.trim());
+        currentCell = '';
+      } else if ((ch === '\r' || ch === '\n') && !inQuotes) {
+        if (ch === '\r' && csvText[i + 1] === '\n') {
+          i++;
+        }
+        currentRow.push(currentCell.trim());
+        if (currentRow.some(cell => cell !== '')) {
+          rows.push(currentRow);
+        }
+        currentRow = [];
+        currentCell = '';
+      } else {
+        currentCell += ch;
+      }
+    }
+
+    if (currentCell !== '' || currentRow.length > 0) {
+      currentRow.push(currentCell.trim());
+      if (currentRow.some(cell => cell !== '')) {
+        rows.push(currentRow);
+      }
+    }
+    return rows;
+  }
+
+  function renderThanks(thanksData, district) {
+    const section = document.getElementById('thanksSection');
+    const titleEl = document.getElementById('thanksTitle');
+    const bodyEl = document.getElementById('thanksBody');
+
+    const fallbackTitle = district && district.id !== 'miaoli-3'
+      ? `感謝 ${district.label} 鄉親的支持與肯定`
+      : DEFAULT_THANKS.title;
+    const fallbackBody = district && district.id !== 'miaoli-3'
+      ? `感謝所有志工夥伴、助選團隊與各投開票所回報人員的辛勞付出，讓 ${district.label} 開票資訊即時透明呈現！`
+      : DEFAULT_THANKS.body;
+
+    if (!thanksData.visible || (!thanksData.title && !thanksData.body)) {
+      section.classList.add('hidden');
+      return;
+    }
+    section.classList.remove('hidden');
+    titleEl.textContent = thanksData.title || fallbackTitle;
+    bodyEl.textContent = thanksData.body || fallbackBody;
+  }
+
+  function parseThanksCSV(csvText, district) {
+    const rows = parseCSV(csvText);
+    const fallbackTitle = district && district.id !== 'miaoli-3'
+      ? `感謝 ${district.label} 鄉親的支持與肯定`
+      : DEFAULT_THANKS.title;
+    const fallbackBody = district && district.id !== 'miaoli-3'
+      ? `感謝所有志工夥伴、助選團隊與各投開票所回報人員的辛勞付出，讓 ${district.label} 開票資訊即時透明呈現！`
+      : DEFAULT_THANKS.body;
+
+    if (rows.length === 0) {
+      return { title: fallbackTitle, body: fallbackBody, visible: true };
+    }
+
+    let title = '';
+    const bodyLines = [];
+    let visible = true;
+
+    for (let i = 0; i < rows.length; i++) {
+      const cols = rows[i];
+      const key = (cols[0] || '').trim();
+      const val = (cols[1] || '').trim();
+
+      if (key === '標題' || key === '致謝標題') {
+        title = val;
+      } else if (key === '致謝內容' || key === '內容' || key === '致謝詞') {
+        if (val) bodyLines.push(val);
+      } else if (key === '顯示開關' || key === '顯示狀態') {
+        visible = !['隱藏', '關', '關閉', 'false', '0', 'no'].includes(val.toLowerCase());
+      } else if (key === '落款署銜' || key === '署銜') {
+        if (val) bodyLines.push(val);
+      }
+    }
+
+    return {
+      title: title || fallbackTitle,
+      body: bodyLines.length > 0 ? bodyLines.join('\n') : fallbackBody,
+      visible
+    };
+  }
+
+  function getElectedState(item) {
+    const statusVal = (item.electedStatus || '').trim();
+    if (!statusVal || statusVal === '開票中' || statusVal === '未當選' || statusVal === '否' || statusVal === '-') {
+      return { isElected: false, badgeText: '' };
+    }
+    if (statusVal.includes('自行宣布')) {
+      return { isElected: true, badgeText: '🎉 自行宣布當選' };
+    }
+    if (statusVal.includes('當選') || ['是', 'true', '✓', '✔', 'v', 'V'].includes(statusVal)) {
+      return { isElected: true, badgeText: '🏆 當選' };
+    }
+    return { isElected: false, badgeText: '' };
+  }
+
+  function renderCards(list, district) {
+    const board = document.getElementById('board');
+    board.innerHTML = '';
+
+    let total = 0;
+    list.forEach(item => {
+      const v = parseInt(String(item.votes).replace(/,/g, ''), 10) || 0;
+      total += v;
+    });
+    document.getElementById('totalVotes').innerText = total.toLocaleString();
+
+    const eligibleVoters = Math.max(1, parseInt(district.eligibleVoters, 10) || 63384);
+    const castVotes = total;
+    const turnoutPct = ((castVotes / eligibleVoters) * 100).toFixed(2);
+    document.getElementById('turnoutRate').innerText = `${turnoutPct}%`;
+
+    const maxVotes = Math.max(...list.map(i => parseInt(String(i.votes).replace(/,/g, ''), 10) || 0));
+
+    list.forEach(item => {
+      const v = parseInt(String(item.votes).replace(/,/g, ''), 10) || 0;
+      const tx = parseInt(String(item.tongxiao || '0').replace(/,/g, ''), 10) || 0;
+      const yl = parseInt(String(item.yuanli || '0').replace(/,/g, ''), 10) || 0;
+      const isTop = (maxVotes > 0 && v === maxVotes);
+      const isWengJie = String(item.no).trim() === '1' && item.name === '翁杰';
+      const electedState = getElectedState(item);
+      const partyClass = (item.party || '').includes('民主進步黨') ? 'party-tag party-dpp' : 'party-tag';
+
+      const ribbonHtml = electedState.isElected
+        ? `<div><span class="elected-ribbon">${electedState.badgeText}</span></div>`
+        : '';
+
+      board.innerHTML += `
+        <div class="card ${isTop ? 'top-rank' : ''} ${isWengJie ? 'featured-cand' : ''} ${electedState.isElected ? 'elected-highlight' : ''}">
+          ${ribbonHtml}
+          <div class="card-header">
+            <div class="cand-id-name">
+              <div class="no-badge">${item.no}</div>
+              <div class="cand-name">${item.name}</div>
+            </div>
+            <div class="${partyClass}">${item.party}</div>
+          </div>
+          <div class="votes-box">
+            <div class="votes-num">${v.toLocaleString()}</div>
+            <div class="votes-sub">
+              <span>通霄鎮：<strong>${tx.toLocaleString()}</strong></span>
+              <span>苑裡鎮：<strong>${yl.toLocaleString()}</strong></span>
+            </div>
+          </div>
+          <div class="status-bar">
+            <span>狀態：${item.note || '服務處同步中'}</span>
+            <span class="rate-pill">得票率 ${item.rate || '0.00%'}</span>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  function renderStationCounts(completed, pending, totalCount, district) {
+    document.getElementById('completedCount').innerText = completed.toLocaleString();
+    document.getElementById('pendingCount').innerText = pending.toLocaleString();
+    const stationsSub = district && district.stationsSubtext
+      ? district.stationsSubtext
+      : `${totalCount.toLocaleString()} 所`;
+    document.getElementById('stationsDisplay').innerText = stationsSub;
+  }
+
+  function parseStationsStatus(csvText, district) {
+    const rows = parseCSV(csvText);
+    if (rows.length < 2) return null;
+
+    const headerCols = rows[0];
+    let statusColIdx = headerCols.findIndex(h => h.includes('回報狀態') || h.includes('備註'));
+    if (statusColIdx === -1) statusColIdx = 12;
+
+    const minNo = Number.isFinite(parseInt(district.stationMin, 10)) ? parseInt(district.stationMin, 10) : 1;
+    const maxNo = Number.isFinite(parseInt(district.stationMax, 10)) ? parseInt(district.stationMax, 10) : 9999;
+
+    let completed = 0;
+    let pending = 0;
+    let validStations = 0;
+
+    for (let i = 1; i < rows.length; i++) {
+      const cols = rows[i];
+      const town = (cols[0] || '').trim();
+      const stationNoRaw = (cols[1] || '').trim();
+      const stationNo = parseInt(stationNoRaw, 10);
+
+      if (!town || town.includes('小計') || town.includes('總計') || isNaN(stationNo) || stationNo < minNo || stationNo > maxNo) {
+        continue;
+      }
+
+      validStations++;
+      const statusText = (cols[statusColIdx] || '').trim();
+
+      if (statusText.includes('回報完成') || statusText === '完成' || statusText.includes('已回報')) {
+        completed++;
+      } else if (statusText.includes('待開票') || statusText === '' || statusText.includes('未開票')) {
+        pending++;
+      } else {
+        completed++;
+      }
+    }
+
+    if (validStations === 0) return null;
+    return { completed, pending, totalCount: validStations };
+  }
+
+  function applyDistrictHeaderMetadata(district) {
+    document.title = district.pageTitle || `苗栗縣議員選舉（${district.label}）即時看板`;
+    document.getElementById('mainTitle').innerText = district.headerTitle || `苗栗縣議會第21屆議員選舉 — ${district.label}`;
+    document.getElementById('eligibleDisplay').innerText =
+      district.eligibleSubtext || `${Number(district.eligibleVoters || 63384).toLocaleString()} 人`;
+    const expectedTotal = Math.max(1, parseInt(district.totalStations, 10) || 75);
+    document.getElementById('stationsDisplay').innerText =
+      district.stationsSubtext || `${expectedTotal.toLocaleString()} 所`;
+  }
+
+  async function fetchDataForDistrict(district, seq) {
+    const badge = document.getElementById('connBadge');
+    const connText = document.getElementById('connText');
+    const expectedTotal = Math.max(1, parseInt(district.totalStations, 10) || 75);
+    const ts = new Date().getTime();
+
+    if (!district.sheetId || !district.sheetId.trim()) {
+      if (seq !== activeFetchSeq) return;
+      badge.classList.add('error');
+      connText.innerText = '尚未設定此選區 Google 試算表 ID（可於右側選區面板填入）';
+      renderCards(DEFAULT_DATA, district);
+      renderStationCounts(0, expectedTotal, expectedTotal, district);
+      renderThanks({ ...DEFAULT_THANKS }, district);
+      return;
+    }
+
+    const encodedSummary = encodeURIComponent(district.summarySheetName || '即時看板總表');
+    const encodedStations = encodeURIComponent(district.stationsSheetName || '投開票所逐所計票');
+    const encodedThanks = encodeURIComponent(district.thanksSheetName || '致謝設定');
+
+    const summaryUrl = `https://docs.google.com/spreadsheets/d/${district.sheetId}/gviz/tq?tqx=out:csv&sheet=${encodedSummary}`;
+    const stationsUrl = `https://docs.google.com/spreadsheets/d/${district.sheetId}/gviz/tq?tqx=out:csv&sheet=${encodedStations}`;
+    const thanksUrl = `https://docs.google.com/spreadsheets/d/${district.sheetId}/gviz/tq?tqx=out:csv&sheet=${encodedThanks}`;
+
+    try {
+      const [summaryRes, stationsRes, thanksRes] = await Promise.all([
+        fetch(`${summaryUrl}&t=${ts}`),
+        fetch(`${stationsUrl}&t=${ts}`),
+        fetch(`${thanksUrl}&t=${ts}`)
+      ]);
+
+      if (seq !== activeFetchSeq) return;
+
+      if (!summaryRes.ok) throw new Error('Summary HTTP ' + summaryRes.status);
+      const summaryText = await summaryRes.text();
+      if (summaryText.includes('TABLE_NOT_FOUND') || summaryText.includes('Invalid query')) {
+        throw new Error('找不到總表分頁');
+      }
+      const summaryRows = parseCSV(summaryText);
+
+      const parsed = [];
+      for (let i = 1; i < summaryRows.length; i++) {
+        const cols = summaryRows[i];
+        const [no, name, party, votes, rate, note, tongxiao, yuanli, electedStatus] = cols;
+        if (!name || no === '合計') continue;
+        parsed.push({
+          no: no || String(i),
+          name,
+          party: party || '無',
+          votes: votes || 0,
+          rate: rate || '0.00%',
+          note: note || '開票統計中',
+          tongxiao: tongxiao || 0,
+          yuanli: yuanli || 0,
+          electedStatus: electedStatus || ''
+        });
+      }
+
+      if (parsed.length === 0) {
+        throw new Error('即時看板總表無有效資料列');
+      }
+
+      renderCards(parsed, district);
+
+      if (stationsRes.ok) {
+        const stationsText = await stationsRes.text();
+        const counts = parseStationsStatus(stationsText, district);
+        if (counts) {
+          renderStationCounts(counts.completed, counts.pending, counts.totalCount, district);
+        } else {
+          renderStationCounts(0, expectedTotal, expectedTotal, district);
+        }
+      } else {
+        renderStationCounts(0, expectedTotal, expectedTotal, district);
+      }
+
+      if (thanksRes.ok) {
+        const thanksText = await thanksRes.text();
+        if (thanksText && !thanksText.includes('TABLE_NOT_FOUND') && !thanksText.includes('Invalid query')) {
+          renderThanks(parseThanksCSV(thanksText, district), district);
+        } else {
+          renderThanks({ ...DEFAULT_THANKS }, district);
+        }
+      } else {
+        renderThanks({ ...DEFAULT_THANKS }, district);
+      }
+
+      if (seq !== activeFetchSeq) return;
+      const now = new Date();
+      document.getElementById('lastUpdate').innerText = now.toLocaleTimeString('zh-TW', { hour12: false });
+      badge.classList.remove('error');
+      connText.innerText = `雲端即時同步中（${district.label}・每 5 秒更新）`;
+    } catch (err) {
+      if (seq !== activeFetchSeq) return;
+      console.error('讀取雲端試算表失敗:', err);
+      badge.classList.add('error');
+      connText.innerText = '連線中斷（請確認試算表已設為「知道連結者皆可檢視」或檢查分頁名稱）';
+      renderCards(DEFAULT_DATA, district);
+      renderStationCounts(0, expectedTotal, expectedTotal, district);
+      renderThanks({ ...DEFAULT_THANKS }, district);
+    }
+  }
+
+  function startDistrictPolling(districtId, immediate = true) {
+    if (pollTimerId !== null) {
+      clearInterval(pollTimerId);
+      pollTimerId = null;
+    }
+
+    activeFetchSeq += 1;
+    const currentSeq = activeFetchSeq;
+
+    if (districts.some(d => d.id === districtId)) {
+      activeDistrictId = districtId;
+    } else {
+      activeDistrictId = districts[0].id;
+    }
+
+    saveDistrictsToStorage();
+    const district = getActiveDistrict();
+    applyDistrictHeaderMetadata(district);
+    renderDistrictList();
+
+    document.getElementById('lastUpdate').innerText = '--:--:--';
+
+    if (immediate) {
+      fetchDataForDistrict(district, currentSeq);
+    }
+
+    pollTimerId = setInterval(() => {
+      const latestDistrict = getActiveDistrict();
+      fetchDataForDistrict(latestDistrict, currentSeq);
+    }, REFRESH_SECONDS * 1000);
+  }
+
+  /* 抽屜開啟 / 關閉與鍵盤支援 */
+  const drawerEl = document.getElementById('districtDrawer');
+  const backdropEl = document.getElementById('drawerBackdrop');
+  const toggleBtnEl = document.getElementById('drawerToggleBtn');
+  const closeBtnEl = document.getElementById('drawerCloseBtn');
+
+  function openDrawer() {
+    drawerEl.classList.add('open');
+    backdropEl.classList.add('open');
+    drawerEl.setAttribute('aria-hidden', 'false');
+    backdropEl.setAttribute('aria-hidden', 'false');
+    toggleBtnEl.setAttribute('aria-expanded', 'true');
+  }
+
+  function closeDrawer() {
+    drawerEl.classList.remove('open');
+    backdropEl.classList.remove('open');
+    drawerEl.setAttribute('aria-hidden', 'true');
+    backdropEl.setAttribute('aria-hidden', 'true');
+    toggleBtnEl.setAttribute('aria-expanded', 'false');
+  }
+
+  toggleBtnEl.addEventListener('click', () => {
+    if (drawerEl.classList.contains('open')) {
+      closeDrawer();
+    } else {
+      openDrawer();
+    }
+  });
+
+  closeBtnEl.addEventListener('click', closeDrawer);
+  backdropEl.addEventListener('click', closeDrawer);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && drawerEl.classList.contains('open')) {
+      closeDrawer();
+    }
+  });
+
+  /* 選區清單渲染與編輯/刪除操作 */
+  function escapeHtml(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function renderDistrictList() {
+    const listContainer = document.getElementById('districtList');
+    listContainer.innerHTML = '';
+
+    districts.forEach(d => {
+      const isActive = d.id === activeDistrictId;
+      const hasSheet = Boolean(d.sheetId && d.sheetId.trim());
+      const badgeHtml = isActive
+        ? `<span class="badge-active">目前檢視中</span>`
+        : (d.isCustom
+            ? `<span class="badge-custom">自訂選區</span>`
+            : (d.isTemplate ? `<span class="badge-template">範本選區</span>` : ''));
+
+      const sheetPreview = hasSheet
+        ? `<code>${escapeHtml(d.sheetId.slice(0, 14))}…</code>`
+        : `<span style="color:#facc15;">尚未填入 Sheet ID</span>`;
+
+      const canDelete = d.id !== 'miaoli-3' && !isActive;
+
+      const card = document.createElement('div');
+      card.className = `district-item ${isActive ? 'active' : ''}`;
+      card.innerHTML = `
+        <div class="district-item-top">
+          <div class="district-item-name">${escapeHtml(d.label)}</div>
+          <div class="district-badges">${badgeHtml}</div>
+        </div>
+        <div class="district-item-meta">
+          <div>試算表：${sheetPreview}・分頁：<code>${escapeHtml(d.summarySheetName || '即時看板總表')}</code></div>
+          <div>選舉人數：<strong>${Number(d.eligibleVoters || 0).toLocaleString()}</strong> 人・票所：<strong>${Number(d.totalStations || 0).toLocaleString()}</strong> 所</div>
+        </div>
+        <div class="district-item-actions">
+          <button type="button" class="btn-switch" data-action="switch" data-id="${escapeHtml(d.id)}">
+            ${isActive ? '目前正在同步此選區' : '切換至此選區'}
+          </button>
+          <button type="button" class="btn-mini" data-action="edit" data-id="${escapeHtml(d.id)}">編輯</button>
+          ${canDelete ? `<button type="button" class="btn-mini danger" data-action="delete" data-id="${escapeHtml(d.id)}">刪除</button>` : ''}
+        </div>
+      `;
+      listContainer.appendChild(card);
+    });
+  }
+
+  function populateFormForEdit(district) {
+    document.getElementById('editDistrictId').value = district.id;
+    document.getElementById('formHeading').innerText = `編輯選區：${district.label}`;
+    document.getElementById('cfgDistrictLabel').value = district.label || '';
+    document.getElementById('cfgHeaderTitle').value = district.headerTitle || '';
+    document.getElementById('cfgSheetId').value = district.sheetId || '';
+    document.getElementById('cfgSummarySheet').value = district.summarySheetName || '即時看板總表';
+    document.getElementById('cfgStationsSheet').value = district.stationsSheetName || '投開票所逐所計票';
+    document.getElementById('cfgThanksSheet').value = district.thanksSheetName || '致謝設定';
+    document.getElementById('cfgEligibleVoters').value = district.eligibleVoters || 63384;
+    document.getElementById('cfgEligibleSub').value = district.eligibleSubtext || '';
+    document.getElementById('cfgTotalStations').value = district.totalStations || 75;
+    document.getElementById('cfgStationRange').value = `${district.stationMin ?? 1}-${district.stationMax ?? 999}`;
+    document.getElementById('cfgStationsSub').value = district.stationsSubtext || '';
+    setFeedback(`已載入「${district.label}」設定，修改後可儲存。`, false);
+  }
+
+  function clearDistrictForm() {
+    document.getElementById('editDistrictId').value = '';
+    document.getElementById('formHeading').innerText = '新增 / 編輯選區設定';
+    document.getElementById('districtForm').reset();
+    document.getElementById('cfgSummarySheet').value = '即時看板總表';
+    document.getElementById('cfgStationsSheet').value = '投開票所逐所計票';
+    document.getElementById('cfgThanksSheet').value = '致謝設定';
+    document.getElementById('cfgStationRange').value = '1-999';
+    setFeedback('', false);
+  }
+
+  function setFeedback(msg, isWarn) {
+    const el = document.getElementById('drawerFeedback');
+    el.innerText = msg;
+    el.classList.toggle('warn', Boolean(isWarn));
+  }
+
+  function parseStationRange(rawRange) {
+    const parts = String(rawRange || '').split('-').map(s => parseInt(s.trim(), 10));
+    const min = Number.isFinite(parts[0]) ? parts[0] : 1;
+    const max = Number.isFinite(parts[1]) ? parts[1] : 9999;
+    return min <= max ? { min, max } : { min: max, max: min };
+  }
+
+  function upsertDistrictFromForm(shouldSwitch) {
+    const label = document.getElementById('cfgDistrictLabel').value.trim();
+    const sheetId = document.getElementById('cfgSheetId').value.trim();
+    const eligibleVoters = Math.max(1, parseInt(document.getElementById('cfgEligibleVoters').value, 10) || 0);
+    const totalStations = Math.max(1, parseInt(document.getElementById('cfgTotalStations').value, 10) || 0);
+
+    if (!label) {
+      setFeedback('請填寫代表選區名稱。', true);
+      return;
+    }
+    if (!eligibleVoters || !totalStations) {
+      setFeedback('選舉人數與投開票所總數需大於 0。', true);
+      return;
+    }
+
+    const editId = document.getElementById('editDistrictId').value.trim();
+    const headerTitleInput = document.getElementById('cfgHeaderTitle').value.trim();
+    const summarySheetName = document.getElementById('cfgSummarySheet').value.trim() || '即時看板總表';
+    const stationsSheetName = document.getElementById('cfgStationsSheet').value.trim() || '投開票所逐所計票';
+    const thanksSheetName = document.getElementById('cfgThanksSheet').value.trim() || '致謝設定';
+    const eligibleSubInput = document.getElementById('cfgEligibleSub').value.trim();
+    const stationsSubInput = document.getElementById('cfgStationsSub').value.trim();
+    const range = parseStationRange(document.getElementById('cfgStationRange').value);
+
+    const computedHeader = headerTitleInput || `苗栗縣議會第21屆議員選舉 — ${label}`;
+    const computedPageTitle = `苗栗縣第21屆議員選舉（${label}）即時看板`;
+    const computedEligibleSub = eligibleSubInput || `${eligibleVoters.toLocaleString()} 人`;
+    const computedStationsSub = stationsSubInput || `${totalStations.toLocaleString()} 所`;
+
+    let targetId = editId;
+    if (editId) {
+      const idx = districts.findIndex(d => d.id === editId);
+      if (idx !== -1) {
+        districts[idx] = {
+          ...districts[idx],
+          label,
+          pageTitle: computedPageTitle,
+          headerTitle: computedHeader,
+          sheetId,
+          summarySheetName,
+          stationsSheetName,
+          thanksSheetName,
+          eligibleVoters,
+          eligibleSubtext: computedEligibleSub,
+          totalStations,
+          stationsSubtext: computedStationsSub,
+          stationMin: range.min,
+          stationMax: range.max,
+          isTemplate: false
+        };
+      }
+    } else {
+      targetId = `custom-${Date.now()}`;
+      districts.push({
+        id: targetId,
+        label,
+        pageTitle: computedPageTitle,
+        headerTitle: computedHeader,
+        sheetId,
+        summarySheetName,
+        stationsSheetName,
+        thanksSheetName,
+        eligibleVoters,
+        eligibleSubtext: computedEligibleSub,
+        totalStations,
+        stationsSubtext: computedStationsSub,
+        stationMin: range.min,
+        stationMax: range.max,
+        isTemplate: false,
+        isCustom: true
+      });
+    }
+
+    saveDistrictsToStorage();
+    renderDistrictList();
+
+    if (shouldSwitch) {
+      startDistrictPolling(targetId, true);
+      setFeedback(`已儲存並切換至「${label}」。`, false);
+      closeDrawer();
+    } else {
+      if (targetId === activeDistrictId) {
+        startDistrictPolling(targetId, true);
+      }
+      setFeedback(`已儲存「${label}」設定。`, false);
+    }
+  }
+
+  document.getElementById('districtList').addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-action]');
+    if (!btn) return;
+    const action = btn.getAttribute('data-action');
+    const id = btn.getAttribute('data-id');
+    const target = districts.find(d => d.id === id);
+    if (!target) return;
+
+    if (action === 'switch') {
+      startDistrictPolling(id, true);
+      closeDrawer();
+    } else if (action === 'edit') {
+      populateFormForEdit(target);
+    } else if (action === 'delete') {
+      if (id === 'miaoli-3' || id === activeDistrictId) {
+        setFeedback('無法刪除目前正在檢視或預設第3選區。', true);
+        return;
+      }
+      districts = districts.filter(d => d.id !== id);
+      saveDistrictsToStorage();
+      renderDistrictList();
+      setFeedback(`已移除「${target.label}」。`, false);
+    }
+  });
+
+  document.getElementById('districtForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    upsertDistrictFromForm(true);
+  });
+
+  document.getElementById('saveOnlyBtn').addEventListener('click', () => {
+    upsertDistrictFromForm(false);
+  });
+
+  document.getElementById('clearFormBtn').addEventListener('click', clearDistrictForm);
+
+  document.getElementById('resetDefaultDistrictsBtn').addEventListener('click', () => {
+    districts = cloneInitialDistricts();
+    clearDistrictForm();
+    startDistrictPolling('miaoli-3', true);
+    setFeedback('已還原預設代表選區設定。', false);
+  });
+
+  // 初始化選區與啟動定時同步
+  districts = loadDistrictsFromStorage();
+  const savedActiveId = localStorage.getItem(STORAGE_KEY_ACTIVE_ID);
+  const initialActiveId = districts.some(d => d.id === savedActiveId) ? savedActiveId : 'miaoli-3';
+  startDistrictPolling(initialActiveId, true);
+</script>
+
+</body>
+</html>
